@@ -1,0 +1,17 @@
+{
+  "top_left": {
+    "Tl X": 1088,
+    "Tl Y": 652,
+    "Px X": 0,
+    "Px Y": 0
+  },
+  "image_size": {
+    "width": 3000,
+    "height": 2000
+  },
+  "data_directory": "germany_rplace2023",
+  "subdirectories": {
+    "picture": "pictures",
+    "progress": "progress"
+  }
+}

@@ -1,0 +1,6 @@
+typing-extensions
+pillow
+aiohttp
+bs4
+matplotlib
+numpy
