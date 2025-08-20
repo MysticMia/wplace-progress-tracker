@@ -40,7 +40,7 @@ async def fetch_picture(
         session: aiohttp.ClientSession,
         tl_x: int,
         tl_y: int,
-):
+) -> bytes:
     """
     Fetch a picture from the wplace API.
 
@@ -53,11 +53,20 @@ async def fetch_picture(
             API_FORMAT.format(tl_x, tl_y)
     ) as api_response:
         image_data = await api_response.read()
-        if api_response.status != 200:
+        if api_response.status == 404:
+            print(
+                f"{api_response.status}: Failed to fetch chunk {tl_x},{tl_y}\n"
+                f"This can be because the chunk is entirely empty."
+            )
+            image_byte_io = BytesIO()
+            empty_image = Image.new("RGBA", CHUNK_SIZES, color=(0, 0, 0, 0))
+            empty_image.save(image_byte_io, format="PNG")
+            image_byte_io.seek(0)
+            image_data = image_byte_io.getvalue()
+        elif api_response.status != 200:
             raise ValueError(
                 f"{api_response.status}: Failed to fetch chunk {tl_x},{tl_y}"
             )
-        
         return image_data
 
 
