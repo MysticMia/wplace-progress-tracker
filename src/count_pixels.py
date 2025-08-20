@@ -21,7 +21,12 @@ def get_pixel_count(img: Image.Image) -> dict[ColorName, int]:
             pixel_count[pixel_name] += 1
 
     del pixel_count["Transparent"]
-    return pixel_count
+    sorted_pixel_count = dict(sorted(
+        pixel_count.items(),
+        key=lambda i: i[1],
+        reverse=True
+    ))
+    return sorted_pixel_count
 
 
 def save_pixel_count(config: Config, name: str, data: dict[ColorName, int]):

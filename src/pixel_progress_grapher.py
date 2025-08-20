@@ -68,14 +68,23 @@ def make_graph(
         graph_data: dict[Literal['time'] | ColorName, list[int]]
 ):
     fig, ax = plt.subplots()
+    only_one_data_point = True
     for key in graph_data:
         if key == 'time':
             continue
+        if len(graph_data[key]) > 1:
+            only_one_data_point = False
         ax.plot(
             graph_data['time'],
             graph_data[key],
             label=key,
             color=pixel_color_to_graph_color(PIXEL_COLORS[key])
+        )
+    if only_one_data_point:
+        print(
+            "You only have one data point so far. This means your graph will "
+            "not have any graphs displayed on them yet. Gather more progress "
+            "data to see graphs."
         )
 
     ax.set_title(f"Remaining pixels on '{config.name}'")
@@ -91,8 +100,6 @@ def make_graph(
     fig.subplots_adjust(bottom=0.2)
     path = os.path.join(config.data_directory, "graph.png")
     plt.savefig(path)
-    while not os.path.exists(path):
-        time.sleep(0.05)
 
 
 def main(config_name: str):
