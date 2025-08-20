@@ -78,7 +78,7 @@ def make_graph(
             color=pixel_color_to_graph_color(PIXEL_COLORS[key])
         )
 
-    ax.set_title("Remaining pixels on Lucy's art")
+    ax.set_title(f"Remaining pixels on '{config.name}'")
     ax.set_xlabel('Time')
     ax.set_ylabel('Pixels left')
     ax.set_xticks(

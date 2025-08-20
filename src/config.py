@@ -39,12 +39,14 @@ class ConfigFile(TypedDict):
 
 
 class Config:
+    name: str
     top_left: WplaceCoordinate
     image_size: tuple[int, int]
     data_directory: str
     subdirectories: Subdirectories
 
-    def __init__(self, config_data: ConfigFile) -> None:
+    def __init__(self, name: str, config_data: ConfigFile) -> None:
+        self.name = name
         self.top_left = WplaceCoordinate(
             config_data["top_left"]["Tl X"],
             config_data["top_left"]["Tl Y"],
@@ -98,4 +100,4 @@ def load_config(name: str) -> Config:
     with open(path, "r") as f:
         config_data: ConfigFile = json.loads(f.read())
 
-    return Config(config_data)
+    return Config(name, config_data)
