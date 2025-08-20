@@ -32,7 +32,7 @@ def get_grid_coordinates(
     chunks = []
     for x in range(0, x_chunk_count):
         for y in range(0, y_chunk_count):
-            chunks.append((988 + x, 1413 + y))
+            chunks.append((top_left.TlX + x, top_left.TlY + y))
     return chunks
 
 
@@ -52,7 +52,13 @@ async def fetch_picture(
     async with session.get(
             API_FORMAT.format(tl_x, tl_y)
     ) as api_response:
-        return await api_response.read()
+        image_data = await api_response.read()
+        if api_response.status != 200:
+            raise ValueError(
+                f"{api_response.status}: Failed to fetch chunk {tl_x},{tl_y}"
+            )
+        
+        return image_data
 
 
 async def fetch_pictures(coords: list[tuple[int, int]]) -> list[bytes]:

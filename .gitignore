@@ -1,6 +1,9 @@
 .idea
 old
-lucy_avi_1
-configs/lucy.json
+configs
+!configs/example.json
 */__pycache__/*
 version 2
+
+lucy_avi_1
+ivy_picture_1
