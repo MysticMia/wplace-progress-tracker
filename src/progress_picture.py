@@ -5,34 +5,27 @@ from PIL import Image
 from src.utils.image_utils import get_remaining_pixels
 from .config import load_config, Config
 
-TEMPLATE_NAME = "template.png"
 REMAINING_PIXELS_NAME = "remaining_pixels.png"
 
 
-def load_images(config: Config, progress_picture_name: str):
-    template_path = os.path.join(config.picture_dir, TEMPLATE_NAME)
+def load_picture(config: Config, progress_picture_name: str):
     progress_path = os.path.join(config.picture_dir, progress_picture_name)
 
-    if not os.path.exists(template_path):
-        raise FileNotFoundError(
-            f"Template image not found! Please add {TEMPLATE_NAME} to the "
-            f"picture directory (path: {template_path})."
-        )
     if not os.path.exists(progress_path):
         raise FileNotFoundError(
             f"Progress image not found! Please add {progress_picture_name} "
             f"to the picture directory (path: {progress_path})."
         )
-    template = Image.open(template_path).convert("RGBA")
-    image2 = Image.open(progress_path).convert("RGBA")
-    return template, image2
+
+    return Image.open(progress_path).convert("RGBA")
 
 
 def main(config_name: str, progress_picture_name: str):
     config = load_config(config_name)
 
-    template, image2 = load_images(config, progress_picture_name)
-    remainder_img = get_remaining_pixels(template, image2)
+    template = config.get_template_image()
+    other = load_picture(config, progress_picture_name)
+    remainder_img = get_remaining_pixels(template, other)
 
     path = os.path.join(config.data_directory, REMAINING_PIXELS_NAME)
     remainder_img.save(path)

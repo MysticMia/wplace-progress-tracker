@@ -1,6 +1,7 @@
 import json
 import os.path
 import typing
+from PIL import Image
 
 from src.utils.color_utils import ColorName, PIXEL_COLORS, FREE_PIXEL_COLORS, ColorTuple, PREMIUM_PIXEL_COLORS
 from src.utils.coord_utils import WplaceCoordinate, get_bottom_right_corner
@@ -13,6 +14,7 @@ __all__ = [
 
 
 CONFIG_DIRECTORY = "configs"
+TEMPLATE_NAME = "template.png"
 
 TopLeftCorner = TypedDict(
     "TopLeftCorner",
@@ -23,6 +25,7 @@ TopLeftCorner = TypedDict(
         "Px Y": int
     }
 )
+
 
 class InvalidColorNameError(ValueError):
     pass
@@ -92,6 +95,16 @@ class Config:
         os.makedirs(self.picture_dir, exist_ok=True)
         os.makedirs(self.progress_dir, exist_ok=True)
 
+    def get_template_image(self):
+        template_path = os.path.join(self.picture_dir, TEMPLATE_NAME)
+        if not os.path.exists(template_path):
+            raise FileNotFoundError(
+                f"Template image not found! Please add {TEMPLATE_NAME} to the "
+                f"picture directory (path: {template_path})."
+            )
+        return Image.open(template_path).convert("RGBA")
+
+    # region Properties
     @property
     def bottom_right(self):
         return get_bottom_right_corner(self.top_left, self.image_size)
@@ -138,6 +151,8 @@ class Config:
                     - set(self.bought_colors)
             )
         }
+
+    # endregion Properties
 
 
 def load_config(name: str) -> Config:

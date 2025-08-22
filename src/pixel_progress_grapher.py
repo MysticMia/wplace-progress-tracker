@@ -1,10 +1,10 @@
 import argparse
-import time
 from datetime import datetime
 from io import TextIOWrapper
 
+from src.utils.image_utils import get_pixel_count
 from .config import load_config, Config
-from .pixel_utils import ColorName, ColorTuple, PIXEL_COLORS
+from src.utils.color_utils import ColorName, ColorTuple, PIXEL_COLORS
 from typing import Literal, cast, get_args
 import os
 import matplotlib.pyplot as plt
@@ -33,7 +33,9 @@ def parse_filename_datetime(filename: str) -> int:
     return int(datetime_formatted.timestamp())
 
 
-def get_data(config: Config):
+def get_progress_data(
+        config: Config
+) -> dict[Literal['time'] | ColorName, list[int]]:
     data: dict[Literal['time'] | ColorName, list[int]] = {'time': []}
     for pixel_name in get_args(ColorName.__value__):
         data[pixel_name] = []
@@ -52,6 +54,31 @@ def get_data(config: Config):
     return data
 
 
+def convert_progress_data_to_percentage(
+        config: Config,
+        progress_data: dict[Literal['time'] | ColorName, list[int]]
+) -> dict[Literal['time'] | ColorName, list[float]]:
+    template_image = config.get_template_image()
+    pixel_counts: dict[ColorName, int] = get_pixel_count(template_image)
+    percentage_data: dict[Literal['time'] | ColorName, list[float]] = {}
+    for key in progress_data:
+        if key == "Transparent":
+            # I don't think people care about transparent pixels here.
+            continue
+        if key == 'time':
+            percentage_data[key] = [float(i) for i in progress_data[key]]
+            continue
+        pixel_count = pixel_counts[key]
+        if pixel_count == 0:
+            percentage_data[key] = [0.0 for _ in progress_data[key]]
+            continue
+        percentage_data[key] = [round(i * 100 / pixel_count, 2)
+                                for i in progress_data[key]]
+
+    return percentage_data
+
+
+
 def pixel_color_to_graph_color(
         pixel_color: ColorTuple
 ) -> tuple[float, float, float]:
@@ -65,7 +92,7 @@ def unix_to_timestring(unix_time: int) -> str:
 
 def make_graph(
         config: Config,
-        graph_data: dict[Literal['time'] | ColorName, list[int]]
+        graph_data: dict[Literal['time'] | ColorName, list[int | float]]
 ):
     fig, ax = plt.subplots()
     only_one_data_point = True
@@ -74,9 +101,23 @@ def make_graph(
             continue
         if len(graph_data[key]) > 1:
             only_one_data_point = False
+        # Don't plot graphs once they reached zero.
+        if graph_data[key][0] == 0:
+            # This graph will be entirely zeros so might as well ignore it.
+            continue
+        else:
+            line_data = [
+                float('nan')
+                if i > 0 and graph_data[key][i - 1] == 0
+                # ^ if the previous point is 0, the one point should also be 0
+                #  too: We won't need to plot the 'zero' points
+                #  after the first one.
+                else graph_data[key][i]
+                for i in range(len(graph_data[key]))  # from index 1: i-1>=0
+            ]
         ax.plot(
             graph_data['time'],
-            graph_data[key],
+            line_data,
             label=key,
             color=pixel_color_to_graph_color(PIXEL_COLORS[key])
         )
@@ -90,12 +131,26 @@ def make_graph(
     ax.set_title(f"Remaining pixels on '{config.name}'")
     ax.set_xlabel('Time')
     ax.set_ylabel('Pixels left')
-    ax.set_xticks(
-        graph_data['time'],
-        rotation=20,
-        # ha='right',
-        labels=(unix_to_timestring(i) for i in graph_data['time']),
-    )
+    ax.set_xlim(min(graph_data['time']), max(graph_data['time']))
+    ax.set_ylim(
+        0,
+        max(
+            graph_data[key][0] for key in graph_data
+            if (key != "Transparent"
+                and key != 'time')
+        )*1.05)
+    # ax.set_xticks(
+    #     graph_data['time'],
+    #     rotation=20,
+    #     # ha='right',
+    #     labels=(unix_to_timestring(i) for i in graph_data['time']),
+    # )
+
+    def formatter(x, _):
+        return unix_to_timestring(x)
+
+    ax.xaxis.set_major_formatter(formatter)
+    ax.tick_params(axis='x', labelrotation=20)
     # ax.legend()
     fig.subplots_adjust(bottom=0.2)
     path = os.path.join(config.data_directory, "graph.png")
@@ -104,7 +159,8 @@ def make_graph(
 
 def main(config_name: str):
     config = load_config(config_name)
-    data = get_data(config)
+    data = get_progress_data(config)
+    # data = convert_progress_data_to_percentage(config, data)
     make_graph(config, data)
 
 
