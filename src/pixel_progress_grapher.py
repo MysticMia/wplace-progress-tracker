@@ -116,11 +116,20 @@ def make_graph(
                 else graph_data[key][i]
                 for i in range(len(graph_data[key]))  # from index 1: i-1>=0
             ]
+        line_color = pixel_color_to_graph_color(PIXEL_COLORS[key])
+        if line_color == (1, 1, 1):
+            # Display white as a dotted black line (on a white background)
+            line_style = "dotted"
+            line_color = (0, 0, 0)
+        else:
+            line_style = "solid"
         ax.plot(
+        # ax.step(
             graph_data['time'],
             line_data,
             label=key,
-            color=pixel_color_to_graph_color(PIXEL_COLORS[key])
+            color=line_color,
+            linestyle=line_style,
         )
     if only_one_data_point:
         print(
