@@ -92,7 +92,8 @@ def unix_to_timestring(unix_time: int) -> str:
 
 def make_graph(
         config: Config,
-        graph_data: dict[Literal['time'] | ColorName, list[int | float]]
+        graph_data: (dict[Literal['time'] | ColorName, list[int]]
+                     | dict[Literal['time'] | ColorName, list[float]])
 ):
     fig, ax = plt.subplots()
     only_one_data_point = True

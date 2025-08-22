@@ -96,7 +96,7 @@ class Config:
         os.makedirs(self.progress_dir, exist_ok=True)
 
     def get_template_image(self):
-        template_path = os.path.join(self.picture_dir, TEMPLATE_NAME)
+        template_path = os.path.join(self.data_directory, TEMPLATE_NAME)
         if not os.path.exists(template_path):
             raise FileNotFoundError(
                 f"Template image not found! Please add {TEMPLATE_NAME} to the "
