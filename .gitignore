@@ -2,7 +2,7 @@
 old
 configs
 !configs/example.json
-*/__pycache__/*
+*.pyc
 version 2
 
 lucy_avi_1

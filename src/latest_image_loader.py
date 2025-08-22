@@ -7,7 +7,7 @@ from math import ceil
 from PIL import Image
 from io import BytesIO
 
-from .pixel_utils import WplaceCoordinate
+from src.utils.coord_utils import WplaceCoordinate
 from .config import load_config
 
 

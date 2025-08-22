@@ -1,79 +1,12 @@
 import argparse
 import os.path
 from PIL import Image
+
+from src.utils.image_utils import get_remaining_pixels
 from .config import load_config, Config
-from .pixel_utils import ColorTuple
 
 TEMPLATE_NAME = "template.png"
 REMAINING_PIXELS_NAME = "remaining_pixels.png"
-
-
-def get_difference_mask(
-        img1: Image.Image,
-        img2: Image.Image,
-) -> Image.Image:
-    if img1.size != img2.size:
-        raise ValueError("Images must be the same size")
-    assert img1.mode == 'RGBA', "Image 1 must be RGBA!"
-    assert img2.mode == 'RGBA', "Image 2 must be RGBA!"
-
-    mask = Image.new('1', img1.size)  # '1' = black and white
-
-    # Iterate through each pixel.
-    for x in range(img1.width):
-        for y in range(img1.height):
-            pixel1: ColorTuple = img1.getpixel((x, y))  # type: ignore
-            pixel2: ColorTuple = img2.getpixel((x, y))  # type: ignore
-            if pixel1[3] == 0 or pixel2[3] == 0:
-                # Ignore transparent pixels.
-                continue
-            if pixel1 != pixel2:
-                mask.putpixel((x, y), 1)  # White (1)
-            else:
-                mask.putpixel((x, y), 0)  # Black (0)
-
-    return mask
-
-
-def simple_mask_from_image(img: Image.Image) -> Image.Image:
-    assert img.mode == 'RGBA', "Image must be RGBA!"
-    mask = Image.new('1', img.size)
-    for x in range(img.width):
-        for y in range(img.height):
-            pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
-            if pixel[3] == 0:
-                mask.putpixel((x, y), 0)
-            else:
-                mask.putpixel((x, y), 1)
-    return mask
-
-
-def invert_mask(mask: Image.Image) -> Image.Image:
-    inverted_mask = Image.new('1', mask.size)
-    assert mask.mode == '1', "Mask must be monochrome!"
-    for x in range(mask.width):
-        for y in range(mask.height):
-            pixel: float = mask.getpixel((x, y))  # type: ignore
-            inverted_mask.putpixel((x, y), 1 - pixel)
-    return inverted_mask
-
-
-def get_remaining_pixels(
-        template: Image.Image,
-        progress: Image.Image,
-) -> Image.Image:
-    remaining_pixels = Image.new('RGBA', template.size, (0, 0, 0, 0))
-
-    # Add all pixels that are transparent.
-    placed_pixel_mask = simple_mask_from_image(progress)
-    unplaced_pixel_mask = invert_mask(placed_pixel_mask)
-    remaining_pixels.paste(template, mask=unplaced_pixel_mask)
-
-    # Add incorrect pixels, since those still need to be correctly placed.
-    incorrect_pixels = get_difference_mask(template, progress)
-    remaining_pixels.paste(template, mask=incorrect_pixels)
-
-    return remaining_pixels
 
 
 def load_images(config: Config, progress_picture_name: str):

@@ -1,5 +1,13 @@
 from typing import Literal
-from typing_extensions import NamedTuple
+
+
+__all__ = [
+    "ColorTuple",
+    "ColorName",
+    "PIXEL_COLORS",
+    "FREE_PIXEL_COLORS",
+    "PREMIUM_PIXEL_COLORS",
+]
 
 
 type ColorTuple = tuple[int, int, int, int]
@@ -88,47 +96,54 @@ def get_pixel_colors() -> dict[ColorName, ColorTuple]:
     return pixel_colors
 
 
-PIXEL_COLORS = get_pixel_colors()
+PIXEL_COLORS: dict[ColorName, ColorTuple] = get_pixel_colors()
 
 
-class WplaceCoordinate(NamedTuple):
-    TlX: int
-    TlY: int
-    PxX: int
-    PxY: int
+free_pixel_color_names: set[ColorName] = {
+    "Black",
+    "Dark Gray",
+    "Gray",
+    "Light Gray",
+    "White",
+    "Deep Red",
+    "Red",
+    "Orange",
+    "Gold",
+    "Yellow",
+    "Light Yellow",
+    "Dark Green",
+    "Green",
+    "Light Green",
+    "Dark Teal",
+    "Teal",
+    "Light Teal",
+    "Cyan",
+    "Dark Blue",
+    "Blue",
+    "Indigo",
+    "Light Indigo",
+    "Dark Purple",
+    "Purple",
+    "Light Purple",
+    "Dark Pink",
+    "Pink",
+    "Light Pink",
+    "Dark Brown",
+    "Brown",
+    "Beige",
+    "Transparent"
+}
 
-    def is_valid(self) -> bool:
-        """
-        Tests if a wplace coordinate is within certain bounds.
 
-        :return: True if the coordinates are valid, else False.
-        """
-        return (
-                0 <= self.TlX < 2048
-                and 0 <= self.TlY < 2048
-                and 0 <= self.PxX < 1000
-                and 0 <= self.PxY < 1000
-        )
+FREE_PIXEL_COLORS: dict[ColorName, ColorTuple] = {
+    name: tup
+    for name, tup in PIXEL_COLORS.items()
+    if name in free_pixel_color_names
+}
 
 
-def get_bottom_right_corner(
-        top_left: WplaceCoordinate,
-        size: tuple[int, int]
-) -> WplaceCoordinate:
-    """
-    Use the top left corner and the image size to calculate the
-    bottom right corner.
-
-    :return: A new wplace coordinate for the bottom right corner.
-    """
-    new_x = top_left.PxX + size[0] - 1
-    new_y = top_left.PxY + size[1] - 1
-    coords = WplaceCoordinate(
-        top_left.TlX + new_x // 1000,
-        top_left.TlY + new_y // 1000,
-        new_x % 1000,
-        new_y % 1000,
-        )
-    assert coords.is_valid(), coords
-    # assert coords == WplaceCoordinate(988, 1414, 798, 37), coords
-    return coords
+PREMIUM_PIXEL_COLORS: dict[ColorName, ColorTuple] = {
+    name: tup
+    for name, tup in PIXEL_COLORS.items()
+    if name not in free_pixel_color_names
+}

@@ -1,12 +1,16 @@
 import json
 import os.path
-from .pixel_utils import WplaceCoordinate, get_bottom_right_corner
+import typing
+
+from src.utils.color_utils import ColorName, PIXEL_COLORS, FREE_PIXEL_COLORS, ColorTuple, PREMIUM_PIXEL_COLORS
+from src.utils.coord_utils import WplaceCoordinate, get_bottom_right_corner
 from typing import TypedDict
 
 __all__ = [
     "Config",
     "load_config"
 ]
+
 
 CONFIG_DIRECTORY = "configs"
 
@@ -19,6 +23,9 @@ TopLeftCorner = TypedDict(
         "Px Y": int
     }
 )
+
+class InvalidColorNameError(ValueError):
+    pass
 
 
 class ImageSize(TypedDict):
@@ -36,6 +43,20 @@ class ConfigFile(TypedDict):
     image_size: ImageSize
     data_directory: str
     subdirectories: Subdirectories
+    bought_colors: list[str]
+
+
+def _validate_colors(color_names: list[str]) -> list[ColorName]:
+    invalid_names: list[str] = []
+    for color_name in color_names:
+        if color_name not in typing.get_args(ColorName.__value__):
+            invalid_names.append(f"'{color_name}'")
+    if len(invalid_names) > 0:
+        raise InvalidColorNameError(
+            f"Invalid color names: "
+            + ', '.join(invalid_names)
+        )
+    return typing.cast(list[ColorName], color_names)
 
 
 class Config:
@@ -44,6 +65,7 @@ class Config:
     image_size: tuple[int, int]
     data_directory: str
     subdirectories: Subdirectories
+    bought_colors: list[ColorName]
 
     def __init__(self, name: str, config_data: ConfigFile) -> None:
         self.name = name
@@ -62,6 +84,7 @@ class Config:
 
         self.data_directory = config_data["data_directory"]
         self.subdirectories = config_data["subdirectories"]
+        self.bought_colors = _validate_colors(config_data["bought_colors"])
 
         self.create_directories()
 
@@ -87,6 +110,35 @@ class Config:
             self.subdirectories["progress"]
         )
 
+    @property
+    def available_colors(self) -> dict[ColorName, ColorTuple]:
+        """
+        Get a dictionary of colors that can be placed by the user.
+
+        :return: A PIXEL_COLORS dictionary where every key is either
+         a free color or bought color.
+        """
+        return {
+            color_name: PIXEL_COLORS[color_name]
+            for color_name in list(FREE_PIXEL_COLORS) + self.bought_colors
+        }
+
+    @property
+    def unavailable_colors(self) -> dict[ColorName, ColorTuple]:
+        """
+        Get a dictionary of colors that cannot be placed by the user.
+
+        :return: A PIXEL_COLORS dictionary where every key is a premium
+         color that has not been bought.
+        """
+        return {
+            color_name: PREMIUM_PIXEL_COLORS[color_name]
+            for color_name in (
+                    set(PREMIUM_PIXEL_COLORS)
+                    - set(self.bought_colors)
+            )
+        }
+
 
 def load_config(name: str) -> Config:
     path = os.path.join(CONFIG_DIRECTORY, f"{name}.json")
@@ -100,4 +152,11 @@ def load_config(name: str) -> Config:
     with open(path, "r") as f:
         config_data: ConfigFile = json.loads(f.read())
 
-    return Config(name, config_data)
+    try:
+        return Config(name, config_data)
+    except KeyError as ex:
+        missing_keys = ', '.join(ex.args)
+        raise ValueError(
+            f"Your config file is missing the key(s): {missing_keys}! "
+            "Please check example.json for the latest format!"
+        ) from None
