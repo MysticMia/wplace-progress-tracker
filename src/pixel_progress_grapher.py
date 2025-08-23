@@ -167,7 +167,9 @@ def make_graph(
     plt.savefig(path)
 
 
-def main(config_name: str):
+def save_pixel_progress_graph(
+        config_name: str,
+):
     config = load_config(config_name)
     data = get_progress_data(config)
     # data = convert_progress_data_to_percentage(config, data)
@@ -185,4 +187,4 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
 
-    main(args.config)
+    save_pixel_progress_graph(args.config)

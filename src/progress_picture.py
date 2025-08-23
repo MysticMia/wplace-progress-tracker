@@ -20,7 +20,7 @@ def load_picture(config: Config, progress_picture_name: str):
     return Image.open(progress_path).convert("RGBA")
 
 
-def main(config_name: str, progress_picture_name: str):
+def save_progress_image(config_name: str, progress_picture_name: str):
     config = load_config(config_name)
 
     template = config.get_template_image()
@@ -48,4 +48,4 @@ if __name__ == "__main__":
     )
 
     args = arg_parser.parse_args()
-    main(args.config, args.progress_picture_name)
+    save_progress_image(args.config, args.progress_picture_name)

@@ -170,7 +170,7 @@ def crop_image(
     ))
 
 
-def main(config_name: str):
+def save_latest_image(config_name: str):
     config = load_config(config_name)
 
     coords = get_grid_coordinates(config.top_left, config.image_size)
@@ -198,5 +198,5 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    t = main(args.config)
+    t = save_latest_image(args.config)
     print(f"Created progress picture at {t}.png")
