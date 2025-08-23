@@ -90,13 +90,48 @@ def unix_to_timestring(unix_time: int) -> str:
     return datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d %H:%M')
 
 
+def select_data_by_time(
+        data: (dict[Literal['time'] | ColorName, list[int]]
+               | dict[Literal['time'] | ColorName, list[float]]),
+        earliest_bound: int,
+        latest_bound: int
+) -> (dict[Literal['time'] | ColorName, list[int]]
+      | dict[Literal['time'] | ColorName, list[float]]):
+    assert "time" in data.keys(), "Missing \"time\" key!"
+    keys, values = zip(*data.items())
+    time_index = keys.index("time")
+
+    # Find index bounds
+    minimum_index = None
+    maximum_index = None
+    for index, val in enumerate(values[time_index]):
+        if minimum_index is None and val >= earliest_bound:
+            # `is None` because we only want the first value, so don't update
+            #  it once it has been set.
+            minimum_index = index
+        if val <= latest_bound:
+            maximum_index = index + 1
+
+    # Note: you can take slices with None: "apple"[None:None] == "apple"
+
+    values = [plot[minimum_index:maximum_index] for plot in values]
+    return dict(zip(keys, values))
+
+
 def make_graph(
         config: Config,
         graph_data: (dict[Literal['time'] | ColorName, list[int]]
-                     | dict[Literal['time'] | ColorName, list[float]])
+                     | dict[Literal['time'] | ColorName, list[float]]),
+        max_minutes: int | None = None
 ):
     fig, ax = plt.subplots()
     only_one_data_point = True
+
+    if max_minutes is not None:
+        now_unix = int(datetime.now().timestamp())
+        max_minutes_unix = now_unix - max_minutes * 60
+        graph_data = select_data_by_time(graph_data, max_minutes_unix, now_unix)
+
     for key in graph_data:
         if key == 'time':
             continue
@@ -106,16 +141,15 @@ def make_graph(
         if graph_data[key][0] == 0:
             # This graph will be entirely zeros so might as well ignore it.
             continue
-        else:
-            line_data = [
-                float('nan')
-                if i > 0 and graph_data[key][i - 1] == 0
-                # ^ if the previous point is 0, the one point should also be 0
-                #  too: We won't need to plot the 'zero' points
-                #  after the first one.
-                else graph_data[key][i]
-                for i in range(len(graph_data[key]))  # from index 1: i-1>=0
-            ]
+        line_data = [
+            float('nan')
+            if i > 0 and graph_data[key][i - 1] == 0
+            # ^ if the previous point is 0, the one point should also be 0
+            #  too: We won't need to plot the 'zero' points
+            #  after the first one.
+            else graph_data[key][i]
+            for i in range(len(graph_data[key]))  # from index 1: i-1>=0
+        ]
         line_color = pixel_color_to_graph_color(PIXEL_COLORS[key])
         if line_color == (1, 1, 1):
             # Display white as a dotted black line (on a white background)
@@ -169,11 +203,12 @@ def make_graph(
 
 def save_pixel_progress_graph(
         config_name: str,
+        max_minutes: int | None = None
 ):
     config = load_config(config_name)
     data = get_progress_data(config)
     # data = convert_progress_data_to_percentage(config, data)
-    make_graph(config, data)
+    make_graph(config, data, max_minutes=max_minutes)
 
 
 if __name__ == "__main__":
@@ -185,6 +220,12 @@ if __name__ == "__main__":
         type=str,
         help="The config to use."
     )
+    arg_parser.add_argument(
+        "--max_minutes",
+        type=int,
+        default=None,
+        help="How far to go back in time, in minutes."
+    )
     args = arg_parser.parse_args()
 
-    save_pixel_progress_graph(args.config)
+    save_pixel_progress_graph(args.config, args.max_minutes)
