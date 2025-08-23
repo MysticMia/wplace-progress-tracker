@@ -2,10 +2,12 @@ import argparse
 import os.path
 from PIL import Image
 
-from src.utils.image_utils import get_remaining_pixels
+from src.utils.image_utils import get_remaining_pixels, filter_colors
 from .config import load_config, Config
 
-REMAINING_PIXELS_NAME = "remaining_pixels.png"
+REMAINING_PIXELS_NAME = "remaining_pixels"
+PLACEABLE_SUFFIX = "_placeable"
+UNPLACEABLE_SUFFIX = "_unplaceable"
 
 
 def load_picture(config: Config, progress_picture_name: str):
@@ -27,8 +29,28 @@ def save_progress_image(config_name: str, progress_picture_name: str):
     other = load_picture(config, progress_picture_name)
     remainder_img = get_remaining_pixels(template, other)
 
-    path = os.path.join(config.output_dir, REMAINING_PIXELS_NAME)
+    path = os.path.join(config.output_dir, REMAINING_PIXELS_NAME + ".png")
     remainder_img.save(path)
+
+    available = filter_colors(remainder_img,
+                              list(config.available_colors.keys()))
+    path = os.path.join(
+        config.output_dir,
+        (REMAINING_PIXELS_NAME
+         + PLACEABLE_SUFFIX
+         + ".png")
+    )
+    available.save(path)
+
+    unavailable = filter_colors(remainder_img,
+                                list(config.unavailable_colors.keys()))
+    path = os.path.join(
+        config.output_dir,
+        (REMAINING_PIXELS_NAME
+         + UNPLACEABLE_SUFFIX
+         + ".png")
+    )
+    unavailable.save(path)
 
 
 if __name__ == "__main__":
