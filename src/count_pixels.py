@@ -18,7 +18,7 @@ def main(config_name: str, file_name: str):
     config = load_config(config_name)
 
     image_path = os.path.join(
-        config.data_directory,
+        config.output_dir,
         f"remaining_pixels.png"
     )
     img = Image.open(image_path)

@@ -81,6 +81,20 @@ def get_remaining_pixels(
         template: Image.Image,
         progress: Image.Image,
 ) -> Image.Image:
+    """
+    Create an image for every color that doesn't match in the template
+    and progress picture.
+
+    :param template: The goal image, in case pixels are placed incorrectly.
+    :param progress: The current state of the canvas, to get remaining pixels.
+    :return: A new image built from the template but masked to the
+     remaining pixels.
+    """
+    if template.size != progress.size:
+        raise ValueError(
+            f"Template and progress image were not the same size!\n"
+            f"Template image: {template.size}, progress image: {progress.size}"
+        )
     remaining_pixels = Image.new('RGBA', template.size, (0, 0, 0, 0))
 
     # Add all pixels that are transparent.
@@ -96,6 +110,12 @@ def get_remaining_pixels(
 
 
 def get_pixel_count(img: Image.Image) -> dict[ColorName, int]:
+    """
+    Counts the occurence of each pixel in a given image.
+
+    :param img: The image to count pixels for.
+    :return: A dictionary mapping each color's name to its number of pixels.
+    """
     assert img.mode == "RGBA", "Image is expected to be RGBA!"
     name_table: dict[ColorTuple, ColorName] = {
         v: k
@@ -116,3 +136,30 @@ def get_pixel_count(img: Image.Image) -> dict[ColorName, int]:
         reverse=True
     ))
     return sorted_pixel_count
+
+
+def filter_colors(
+        img: Image.Image,
+        colors: list[ColorName],
+) -> Image.Image:
+    """
+    Mask colors in an image.
+
+    :param img: Image to filter.
+    :param colors: The colors to test for. If the image contains a color
+     that isn't in this list, it will be made transparent in the output.
+    :return: A new image where every color is either transparent or one
+     of the given colors.
+    """
+    assert img.mode == "RGBA", "Image is expected to be RGBA!"
+    filtered_colors: set[ColorTuple] = {PIXEL_COLORS[i] for i in colors}
+
+    filtered_image = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    for x in range(img.width):
+        for y in range(img.height):
+            pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
+            pixel = (pixel[0], pixel[1], pixel[2], pixel[3]//255)
+            if pixel in filtered_colors:
+                filtered_image.putpixel((x, y), pixel)
+
+    return filtered_image
