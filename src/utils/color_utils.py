@@ -91,7 +91,7 @@ def get_pixel_colors() -> dict[ColorName, ColorTuple]:
             if color_name == "Transparent":
                 color = (0, 0, 0, 0)
             else:
-                color = (r, g, b, 1)
+                color = (r, g, b, 255)
             pixel_colors[color_name] = color
     return pixel_colors
 

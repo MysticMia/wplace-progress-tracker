@@ -125,7 +125,6 @@ def get_pixel_count(img: Image.Image) -> dict[ColorName, int]:
     for x in range(img.width):
         for y in range(img.height):
             pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
-            pixel = (pixel[0], pixel[1], pixel[2], pixel[3]//255)
             pixel_name = name_table[pixel]
             pixel_count[pixel_name] += 1
 
@@ -158,7 +157,6 @@ def filter_colors(
     for x in range(img.width):
         for y in range(img.height):
             pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
-            pixel = (pixel[0], pixel[1], pixel[2], pixel[3]//255)
             if pixel in filtered_colors:
                 filtered_image.putpixel((x, y), pixel)
 
