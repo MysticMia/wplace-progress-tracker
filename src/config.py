@@ -39,6 +39,7 @@ class ImageSize(TypedDict):
 class Subdirectories(TypedDict):
     picture: str
     progress: str
+    output: str
 
 
 class ConfigFile(TypedDict):
@@ -87,6 +88,9 @@ class Config:
 
         self.data_directory = config_data["data_directory"]
         self.subdirectories = config_data["subdirectories"]
+        for subdirectory in Subdirectories.__annotations__:
+            if subdirectory not in self.subdirectories:
+                raise KeyError(subdirectory)
         self.bought_colors = _validate_colors(config_data["bought_colors"])
 
         self.create_directories()
@@ -94,6 +98,7 @@ class Config:
     def create_directories(self) -> None:
         os.makedirs(self.picture_dir, exist_ok=True)
         os.makedirs(self.progress_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def get_template_image(self):
         template_path = os.path.join(self.data_directory, TEMPLATE_NAME)
@@ -121,6 +126,13 @@ class Config:
         return os.path.join(
             self.data_directory,
             self.subdirectories["progress"]
+        )
+
+    @property
+    def output_dir(self):
+        return os.path.join(
+            self.data_directory,
+            self.subdirectories["output"]
         )
 
     @property
@@ -159,10 +171,10 @@ def load_config(name: str) -> Config:
     path = os.path.join(CONFIG_DIRECTORY, f"{name}.json")
     if not os.path.exists(path):
         raise ValueError(
-            f"Config file not found! Please create a {name}.json file in "
+            f"Config file not found! Please create a `{name}.json` file in "
             f"the `{CONFIG_DIRECTORY}` directory with the required keys "
             f"to use this config name!"
-        )
+        ) from None
 
     with open(path, "r") as f:
         config_data: ConfigFile = json.loads(f.read())

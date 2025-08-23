@@ -163,7 +163,7 @@ def make_graph(
     ax.tick_params(axis='x', labelrotation=20)
     # ax.legend()
     fig.subplots_adjust(bottom=0.2)
-    path = os.path.join(config.data_directory, "graph.png")
+    path = os.path.join(config.output_dir, "graph.png")
     plt.savefig(path)
 
 

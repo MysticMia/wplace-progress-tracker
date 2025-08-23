@@ -12,7 +12,8 @@
   "data_directory": "germany_rplace2023",
   "subdirectories": {
     "picture": "pictures",
-    "progress": "progress"
+    "progress": "progress",
+    "output": "outputs"
   },
   "bought_colors": [
     "Light Blue",
