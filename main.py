@@ -11,7 +11,8 @@ from src import (
 def main(
         config_name: str,
         max_minutes: int | None,
-        reload_only: bool
+        reload_only: bool,
+        step_graph: bool,
 ):
     if not reload_only:
         print("Fetching progress image...")
@@ -21,7 +22,7 @@ def main(
         print("Counting pixels...")
         save_pixel_count(config_name, timestamp)
     print("Generating pixel progress graph...")
-    save_pixel_progress_graph(config_name, max_minutes)
+    save_pixel_progress_graph(config_name, max_minutes, step_graph)
     print("Successfully created progress graph.")
 
 
@@ -46,7 +47,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to refetch an image or only reload the graph."
     )
+    arg_parser.add_argument(
+        "--step_graph",
+        action="store_true",
+        help="Whether to make the graph as steps or as a line."
+    )
 
     args = arg_parser.parse_args()
 
-    main(args.config, args.max_minutes, args.reload_only)
+    main(
+        args.config,
+        args.max_minutes,
+        args.reload_only,
+        args.step_graph,
+    )
