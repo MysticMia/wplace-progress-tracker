@@ -5,7 +5,7 @@ from PIL import Image
 from src.config import load_config, Config
 from src.utils.image_utils import get_pixel_count
 from src.utils.color_utils import ColorName
-from src.utils.graphing_utils import Grapher
+from src.utils.graphing_utils import Grapher, parse_filename_datetime
 import os
 
 
@@ -16,8 +16,12 @@ def _get_image_paths(config: Config):
             f"Expected .png file, got {image_path}!"
         )
         image_paths.append(image_path)
+    print(len(image_paths))
     image_paths.sort()  # dir/yyyy-mm-dd hh-mm-ss format should sort alphabetically.
     return image_paths
+
+
+TIME_INTERVAL = 30
 
 
 def put_average_placement_data(
@@ -27,19 +31,25 @@ def put_average_placement_data(
     image_paths = _get_image_paths(config)
 
     previous_image_count: dict[ColorName, int] | None = None
+    previous_image_time: int | None = None
     for image_name in image_paths:
         path = os.path.join(config.picture_dir, image_name)
         img = Image.open(path)
         count = get_pixel_count(img)
+        image_time = parse_filename_datetime(image_name)
         if previous_image_count is None:
             previous_image_count = count
+            previous_image_time = image_time
             continue
 
         previous_image_count = typing.cast(dict[ColorName, int],
                                            previous_image_count)
+        previous_image_time = typing.cast(int, previous_image_time)
         assert count.keys() == previous_image_count.keys()
-        count_difference: dict[ColorName, int] = {
-            k: v - previous_image_count[k]
+
+        timespan = (image_time - previous_image_time)
+        count_difference: dict[ColorName, float] = {
+            k: (v - previous_image_count[k]) * TIME_INTERVAL / timespan
             for k, v in count.items()
         }
         grapher.add_data_point_from_filename(image_name, count_difference)
@@ -57,7 +67,7 @@ def save_average_placement_graph(
     grapher.make_graph(
         config,
         title=f"Pixels placed on '{config.name}'",
-        y_axis_label="Pixels placed",
+        y_axis_label="Pixels per minute",
         max_minutes=max_minutes,
         as_step=step_graph,
         hide_repeating_zeros=False,
