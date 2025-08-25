@@ -69,6 +69,8 @@ def save_pixel_progress_graph(
     # data = convert_progress_data_to_percentage(config, data)
     grapher.make_graph(
         config,
+        f"Remaining pixels on '{config.name}'",
+        "Remaining pixels (%)",
         max_minutes=max_minutes,
         as_step=as_step
     )

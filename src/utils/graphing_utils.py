@@ -93,11 +93,29 @@ class Grapher:
         values = [plot[minimum_index:maximum_index] for plot in values]
         self.data = dict(zip(keys, values))
 
+    def hide_repeating_zeros_data(self) -> None:
+        for key in self.data:
+            if key == 'time':
+                continue
+            self.data[key] = [
+                float('nan')
+                if i > 0 and self.data[key][i - 1] == 0
+                # ^ if the previous point is 0, the one point should also be 0
+                #  too: We won't need to plot the 'zero' points
+                #  after the first one.
+                else self.data[key][i]
+                for i in range(len(self.data[key]))  # from index 1: i-1>=0
+            ]
+
     def make_graph(
             self,
             config: Config,
+            title: str,
+            y_axis_label: str,
+            *,
             max_minutes: int | None = None,
-            as_step: bool = False
+            as_step: bool = False,
+            hide_repeating_zeros: bool = True,
     ):
         fig, ax = plt.subplots()
         only_one_data_point = True
@@ -106,6 +124,9 @@ class Grapher:
             now_unix = int(datetime.now().timestamp())
             max_minutes_unix = now_unix - max_minutes * 60
             self.crop_data_to_time_range(max_minutes_unix, now_unix)
+
+        if hide_repeating_zeros:
+            self.hide_repeating_zeros_data()
 
         for key in self.data:
             if key == 'time':
@@ -116,15 +137,6 @@ class Grapher:
             if self.data[key][0] == 0:
                 # This graph will be entirely zeros so might as well ignore it.
                 continue
-            line_data = [
-                float('nan')
-                if i > 0 and self.data[key][i - 1] == 0
-                # ^ if the previous point is 0, the one point should also be 0
-                #  too: We won't need to plot the 'zero' points
-                #  after the first one.
-                else self.data[key][i]
-                for i in range(len(self.data[key]))  # from index 1: i-1>=0
-            ]
             line_color = _pixel_color_to_graph_color(PIXEL_COLORS[key])
             if line_color == (1, 1, 1):
                 # Display white as a dotted black line (on a white background)
@@ -136,7 +148,7 @@ class Grapher:
             if as_step:
                 ax.step(
                     self.data['time'],
-                    line_data,
+                    self.data[key],
                     label=key,
                     color=line_color,
                     linestyle=line_style,
@@ -145,7 +157,7 @@ class Grapher:
             else:
                 ax.plot(
                     self.data['time'],
-                    line_data,
+                    self.data[key],
                     label=key,
                     color=line_color,
                     linestyle=line_style,
@@ -158,12 +170,16 @@ class Grapher:
                 "data to see graphs."
             )
 
-        ax.set_title(f"Remaining pixels on '{config.name}'")
+        ax.set_title(title)
         ax.set_xlabel('Time')
-        ax.set_ylabel('Pixels left')
+        ax.set_ylabel(y_axis_label)
         ax.set_xlim(min(self.data['time']), max(self.data['time']))
         ax.set_ylim(
-            0,
+            min(
+                min(self.data[key]) for key in self.data
+                if (key != "Transparent"
+                    and key != 'time')
+            ) * 1.05,
             max(
                 max(self.data[key]) for key in self.data
                 if (key != "Transparent"
