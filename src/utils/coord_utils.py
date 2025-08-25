@@ -55,14 +55,29 @@ def get_canvas_size(
     :param bottom_right: The bottom right corner of the selection.
     :return: A tuple of the width (x) and height (y) of the selected area.
     """
-    x = abs(
-        1000 * (top_left.TlX - bottom_right.TlX)
-        + top_left.PxX - bottom_right.PxX
+    x = (
+        1000 * (bottom_right.TlX - top_left.TlX)
+        + bottom_right.PxX - top_left.PxX
         + 1  # size is inclusive
     )
-    y = abs(
-        1000 * (top_left.TlY - bottom_right.TlY)
-        + top_left.PxY - bottom_right.PxY
+    y = (
+        1000 * (bottom_right.TlY - top_left.TlY)
+        + bottom_right.PxY - top_left.PxY
         + 1  # size is inclusive
     )
     return x, y
+
+
+def pixel_string_to_coordinate(pixel_string: str) -> WplaceCoordinate:
+    # (Tl X: 1037, Tl Y: 1397, Px X: 791, Px Y: 234)
+    # to WplaceCoordinate(1037, 1397, 791, 234)
+    pixel_string = (pixel_string
+                    .replace("(", "")
+                    .replace(")", "")
+                    .strip())
+    sections = pixel_string.split(",")
+    assert len(sections) == 4
+    num_strings = [section.split(": ")[1] for section in sections]
+    nums = [int(num_string) for num_string in num_strings]
+    assert len(nums) == 4
+    return WplaceCoordinate(nums[0], nums[1], nums[2], nums[3])
