@@ -29,6 +29,7 @@ def create_circle_overlay(
         circle_radius: int,
         circle_width: int,
         circle_color: ColorTuple,
+        background_color: ColorTuple | None = None,
         on_template: bool = False,
 ) -> Image.Image:
     if circle_radius <= circle_width:
@@ -65,14 +66,17 @@ def create_circle_overlay(
         "RGBA", remaining_pixels.size, color=circle_color)
 
     if on_template:
-        template = config.get_template_image()
-        assert template.size == remaining_pixels.size
-        # ^ should be from same template
-        template.paste(just_the_color, (0, 0), circle_mask)
-        return template
+        canvas = config.get_template_image()
     else:
-        remaining_pixels.paste(just_the_color, (0, 0), circle_mask)
-        return remaining_pixels
+        canvas = remaining_pixels
+
+    if background_color is not None:
+        background = Image.new("RGBA", canvas.size, color=background_color)
+        background.paste(canvas, mask=Mask.from_pixel_opacity(canvas))
+        canvas = background
+
+    canvas.paste(just_the_color, mask=circle_mask)
+    return canvas
 
 
 def parse_rgba_color(color: str) -> ColorTuple:
@@ -102,17 +106,22 @@ def save_pixel_locator_image(
         circle_radius: int = 6,
         circle_width: int = 2,
         circle_color_str: str = "255,0,0,255",
+        background_color_str: str | None = None,
         on_template: bool = False,
 ):
     config = load_config(config_name)
     color = _validate_color(color_str)
     circle_color = parse_rgba_color(circle_color_str)
+    background_color = None
+    if background_color_str is not None:
+        background_color = parse_rgba_color(background_color_str)
     circle_overlay = create_circle_overlay(
         config=config,
         pixel_color=color,
         circle_radius=circle_radius,
         circle_width=circle_width,
         circle_color=circle_color,
+        background_color=background_color,
         on_template=on_template,
     )
     output_path = os.path.join(config.output_dir,
@@ -160,6 +169,13 @@ if __name__ == "__main__":
         help="If true, circles are rendered over the template. Otherwise, "
              "circles are rendered over the remaining pixels."
     )
+    arg_parser.add_argument(
+        "--background_color",
+        type=str,
+        default="0,0,0,0",
+        help="The color of the background, like water or grass. "
+             "Use '158,189,255,255' for water."
+    )
 
     args = arg_parser.parse_args()
 
@@ -169,5 +185,6 @@ if __name__ == "__main__":
         args.circle_radius,
         args.circle_width,
         args.circle_color,
+        args.background_color,
         args.on_template,
     )
