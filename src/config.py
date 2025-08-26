@@ -14,7 +14,6 @@ __all__ = [
 
 
 CONFIG_DIRECTORY = "configs"
-TEMPLATE_NAME = "template.png"
 
 TopLeftCorner = TypedDict(
     "TopLeftCorner",
@@ -63,8 +62,18 @@ def _validate_colors(color_names: list[str]) -> list[ColorName]:
     return typing.cast(list[ColorName], color_names)
 
 
+class FileNames:
+    TEMPLATE_NAME = "template.png"
+    GRAPH_NAME = "graph.png"
+    REMAINING_PIXELS_NAME = "remaining_pixels.png"
+    REMAINING_PLACEABLE_PIXELS_NAME = "remaining_pixels_placeable.png"
+    REMAINING_UNPLACEABLE_PIXELS_NAME = "remaining_pixels_unplaceable.png"
+    CIRCLE_OVERLAY_NAME = "pixel_finder.png"
+
+
 class Config:
     name: str
+    paths = FileNames()
     top_left: WplaceCoordinate
     image_size: tuple[int, int]
     data_directory: str
@@ -101,11 +110,13 @@ class Config:
         os.makedirs(self.output_dir, exist_ok=True)
 
     def get_template_image(self):
-        template_path = os.path.join(self.data_directory, TEMPLATE_NAME)
+        template_path = os.path.join(self.data_directory,
+                                     self.paths.TEMPLATE_NAME)
         if not os.path.exists(template_path):
             raise FileNotFoundError(
-                f"Template image not found! Please add {TEMPLATE_NAME} to the "
-                f"picture directory (path: {template_path})."
+                f"Template image not found! Please add "
+                f"{self.paths.TEMPLATE_NAME} to the picture directory "
+                f"(path: {template_path})."
             )
         return Image.open(template_path).convert("RGBA")
 

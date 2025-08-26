@@ -1,3 +1,5 @@
+import typing
+
 from PIL import Image
 
 from src.utils.color_utils import (
@@ -23,13 +25,17 @@ class Mask(Image.Image):
     # region Static constructors
 
     @staticmethod
-    def from_monochrome_image(img: Image.Image):
+    def new(size: tuple[int, int]) -> "Mask":
+        return Mask(Image.new("1", size))
+
+    @staticmethod
+    def from_monochrome_image(img: Image.Image) -> "Mask":
         if img.mode != '1':
             raise ValueError("Mask must be monochrome!")
         return Mask(img)
 
     @staticmethod
-    def from_pixel_opacity(img: Image.Image):
+    def from_pixel_opacity(img: Image.Image) -> "Mask":
         assert img.mode == 'RGBA', "Image must be RGBA!"
         mask = Image.new('1', img.size)
         for x in range(img.width):
@@ -39,7 +45,7 @@ class Mask(Image.Image):
         return Mask(mask)
 
     @staticmethod
-    def from_image_difference(img1: Image.Image, img2: Image.Image):
+    def from_image_difference(img1: Image.Image, img2: Image.Image) -> "Mask":
         if img1.size != img2.size:
             raise ValueError("Images must be the same size")
         assert img1.mode == 'RGBA', "Image 1 must be RGBA!"
@@ -62,6 +68,19 @@ class Mask(Image.Image):
 
         return Mask(mask)
 
+    @staticmethod
+    def from_image_color(img: Image.Image, color_name: ColorName) -> "Mask":
+        if img.mode != 'RGBA':
+            raise ValueError("Image must be RGBA!")
+        color = PIXEL_COLORS[color_name]
+        mask = Image.new('1', img.size)
+        for x in range(img.width):
+            for y in range(img.height):
+                pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
+                mask_pixel = int(pixel == color)
+                mask.putpixel((x, y), mask_pixel)
+        return Mask(mask)
+
     # endregion Static constructors
 
     def get_inverted(self) -> "Mask":
@@ -75,6 +94,46 @@ class Mask(Image.Image):
 
     def invert(self) -> None:
         self._from_image(self.get_inverted())
+
+    def union_lighter_color(self, other: "Mask") -> None:
+        if self.size != other.size:
+            raise ValueError("Masks must be the same size!")
+
+        for x in range(self.width):
+            for y in range(self.height):
+                pixel: float = self.im.getpixel((x, y))
+                other_pixel: float = other.im.getpixel((x, y))
+                if pixel == other_pixel:
+                    continue
+                self.im.putpixel((x, y), max(pixel, other_pixel))
+
+    def union_darker_color(self, other: "Mask") -> None:
+        if self.size != other.size:
+            raise ValueError("Masks must be the same size!")
+
+        for x in range(self.width):
+            for y in range(self.height):
+                pixel: float = self.im.getpixel((x, y))
+                other_pixel: float = other.im.getpixel((x, y))
+                if pixel == other_pixel:
+                    continue
+                self.im.putpixel((x, y), min(pixel, other_pixel))
+
+    def iterate_predicate(
+            self,
+            predicate: typing.Callable[[float], bool]
+    ) -> typing.Generator[tuple[int, int], None, None]:
+        """
+        Create an iterator for the coordinates if the pixel at the coordinate
+        passes the predicate.
+
+        :return: A generator with pixel coordinates (x, y).
+        """
+        for x in range(self.width):
+            for y in range(self.height):
+                pixel: float = self.im.getpixel((x, y))
+                if predicate(pixel):
+                    yield x, y
 
 
 def get_remaining_pixels(
