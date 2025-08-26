@@ -29,7 +29,7 @@ def save_progress_image(config_name: str, progress_picture_name: str):
     other = load_picture(config, progress_picture_name)
     remainder_img = get_remaining_pixels(template, other)
 
-    path = os.path.join(config.output_dir, REMAINING_PIXELS_NAME + ".png")
+    path = os.path.join(config.output_dir, REMAINING_PIXELS_NAME)
     remainder_img.save(path)
 
     available = filter_colors(remainder_img,

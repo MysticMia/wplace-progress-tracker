@@ -25,7 +25,7 @@ def _validate_color(color) -> ColorName:
 
 def create_circle_overlay(
         config: Config,
-        pixel_color: ColorName,
+        pixel_colors: list[ColorName],
         circle_radius: int,
         circle_width: int,
         circle_color: ColorTuple,
@@ -38,7 +38,10 @@ def create_circle_overlay(
     remaining_pixel_path = os.path.join(config.output_dir,
                                         config.paths.REMAINING_PIXELS_NAME)
     remaining_pixels = Image.open(remaining_pixel_path)
-    color_mask = Mask.from_image_color(remaining_pixels, pixel_color)
+    color_mask = Mask.new(remaining_pixels.size)
+    for pixel_color in pixel_colors:
+        pixel_mask = Mask.from_image_color(remaining_pixels, pixel_color)
+        color_mask.union_lighter_color(pixel_mask)
 
     circle_mask = Mask.new(remaining_pixels.size)
     circle_draw = ImageDraw.Draw(circle_mask)
@@ -102,7 +105,7 @@ def parse_rgba_color(color: str) -> ColorTuple:
 
 def save_pixel_locator_image(
         config_name: str,
-        color_str: str,
+        color_strs: list[str],
         circle_radius: int = 6,
         circle_width: int = 2,
         circle_color_str: str = "255,0,0,255",
@@ -110,14 +113,14 @@ def save_pixel_locator_image(
         on_template: bool = False,
 ):
     config = load_config(config_name)
-    color = _validate_color(color_str)
+    colors = [_validate_color(c) for c in color_strs]
     circle_color = parse_rgba_color(circle_color_str)
     background_color = None
     if background_color_str is not None:
         background_color = parse_rgba_color(background_color_str)
     circle_overlay = create_circle_overlay(
         config=config,
-        pixel_color=color,
+        pixel_colors=colors,
         circle_radius=circle_radius,
         circle_width=circle_width,
         circle_color=circle_color,
@@ -141,6 +144,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--pixel_color",
         type=str,
+        action="append",
         help="The color to locate. Use quotation marks for colors that "
              "use multiple words: \"Dark Red\"."
     )
