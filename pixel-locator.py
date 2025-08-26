@@ -1,0 +1,173 @@
+import argparse
+import typing
+
+from PIL import Image, ImageDraw
+from src.config import load_config, Config
+from src.utils.image_utils import Mask
+from src.utils.color_utils import ColorName, PIXEL_COLORS, ColorTuple
+import os
+
+
+def _validate_color(color) -> ColorName:
+    if color not in PIXEL_COLORS.keys():
+        for valid_color in PIXEL_COLORS.keys():
+            if valid_color.lower().startswith(color.lower()):
+                raise ValueError(
+                    f"Invalid color: {color}. "
+                    f"Did you mean to use {valid_color} instead? "
+                    f"Make sure you type the exact color, and if it contains "
+                    f"spaces, place quotation marks around it: "
+                    f"\"{valid_color}\"."
+                )
+        raise ValueError(f"Invalid color: {color}")
+    return typing.cast(ColorName, color)
+
+
+def create_circle_overlay(
+        config: Config,
+        pixel_color: ColorName,
+        circle_radius: int,
+        circle_width: int,
+        circle_color: ColorTuple,
+        on_template: bool = False,
+) -> Image.Image:
+    if circle_radius <= circle_width:
+        raise ValueError("Circle radius cannot be smaller than circle width.")
+
+    remaining_pixel_path = os.path.join(config.output_dir,
+                                        config.paths.REMAINING_PIXELS_NAME)
+    remaining_pixels = Image.open(remaining_pixel_path)
+    color_mask = Mask.from_image_color(remaining_pixels, pixel_color)
+
+    circle_mask = Mask.new(remaining_pixels.size)
+    circle_draw = ImageDraw.Draw(circle_mask)
+    # First draw all ellipses, then erase an inner circle (drawing a mask).
+    # Doing this instead of drawing circles everywhere means you don't get
+    #  a ton of overlapping circles, but rather a bounding box of where
+    #  the pixels will be.
+    for x, y in color_mask.iterate_predicate(lambda pixel: pixel == 1):
+        circle_draw.ellipse(
+            xy=(x - circle_radius, y - circle_radius,
+                x + circle_radius, y + circle_radius),
+            fill="white",
+            width=1,
+        )
+    inner_circle_radius = circle_radius - circle_width
+    for x, y in color_mask.iterate_predicate(lambda pixel: pixel == 1):
+        circle_draw.ellipse(
+            xy=(x - inner_circle_radius, y - inner_circle_radius,
+                x + inner_circle_radius, y + inner_circle_radius),
+            fill="black",
+            width=1,
+        )
+
+    just_the_color = Image.new(
+        "RGBA", remaining_pixels.size, color=circle_color)
+
+    if on_template:
+        template = config.get_template_image()
+        assert template.size == remaining_pixels.size
+        # ^ should be from same template
+        template.paste(just_the_color, (0, 0), circle_mask)
+        return template
+    else:
+        remaining_pixels.paste(just_the_color, (0, 0), circle_mask)
+        return remaining_pixels
+
+
+def parse_rgba_color(color: str) -> ColorTuple:
+    sections = color.split(",")
+    if len(sections) != 4:
+        raise ValueError(
+            f"Invalid color: {color}. Should contain three commas."
+        )
+    for section in sections:
+        if not section.isdecimal():
+            raise ValueError(
+                f"Invalid color: {color}. Should contain four "
+                f"numeric numbers (r,g,b,a)."
+            )
+    nums = [int(section) for section in sections]
+    for section in nums:
+        if section < 0 or section > 255:
+            raise ValueError(
+                f"Invalid color: {color}. Colors should be between 0 and 255."
+            )
+    return nums[0], nums[1], nums[2], nums[3]
+
+
+def save_pixel_locator_image(
+        config_name: str,
+        color_str: str,
+        circle_radius: int = 6,
+        circle_width: int = 2,
+        circle_color_str: str = "255,0,0,255",
+        on_template: bool = False,
+):
+    config = load_config(config_name)
+    color = _validate_color(color_str)
+    circle_color = parse_rgba_color(circle_color_str)
+    circle_overlay = create_circle_overlay(
+        config=config,
+        pixel_color=color,
+        circle_radius=circle_radius,
+        circle_width=circle_width,
+        circle_color=circle_color,
+        on_template=on_template,
+    )
+    output_path = os.path.join(config.output_dir,
+                               config.paths.CIRCLE_OVERLAY_NAME)
+    circle_overlay.save(output_path)
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(
+        description="Make a graph of how many pixels got placed over time."
+    )
+    arg_parser.add_argument(
+        "config",
+        type=str,
+        help="The config to use."
+    )
+    arg_parser.add_argument(
+        "--pixel_color",
+        type=str,
+        help="The color to locate. Use quotation marks for colors that "
+             "use multiple words: \"Dark Red\"."
+    )
+    arg_parser.add_argument(
+        "--circle_radius",
+        type=int,
+        default=6,
+        help="The radius of the circle to draw around each pixel."
+    )
+    arg_parser.add_argument(
+        "--circle_width",
+        type=int,
+        default=2,
+        help="The width of the circle to draw around each pixel."
+    )
+    arg_parser.add_argument(
+        "--circle_color",
+        type=str,
+        default="255,0,0,255",
+        help="The color of the circle to draw around each pixel. "
+             "Should be an \"r,g,b,a\" string."
+    )
+    arg_parser.add_argument(
+        "--on_template",
+        action="store_true",
+        help="If true, circles are rendered over the template. Otherwise, "
+             "circles are rendered over the remaining pixels."
+    )
+
+    args = arg_parser.parse_args()
+
+    save_pixel_locator_image(
+        args.config,
+        args.pixel_color,
+        args.circle_radius,
+        args.circle_width,
+        args.circle_color,
+        args.on_template,
+    )
