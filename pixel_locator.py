@@ -37,6 +37,11 @@ def create_circle_overlay(
 
     remaining_pixel_path = os.path.join(config.output_dir,
                                         config.paths.REMAINING_PIXELS_NAME)
+    if not os.path.exists(remaining_pixel_path):
+        raise ValueError(
+            f"File {remaining_pixel_path} does not exist! "
+            "Run `main.py` first to create a progress picture."
+        )
     remaining_pixels = Image.open(remaining_pixel_path)
     color_mask = Mask.new(remaining_pixels.size)
     for pixel_color in pixel_colors:

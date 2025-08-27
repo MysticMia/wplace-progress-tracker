@@ -14,15 +14,23 @@ def _pixel_color_to_graph_color(
     return r / 255, g / 255, b / 255
 
 
-def parse_filename_datetime(filename: str) -> int:
-    datetime_str = filename.split(".", 3)[0]
-    datetime_formatted = datetime.strptime(
-        datetime_str,
+def parse_filename_unix_time(filename: str) -> int:
+    """Convert a name like "2025-08-22T184429.png" to a unix integer."""
+    time = parse_filename_datetime(filename)
+    return int(time.timestamp())
+
+
+def parse_filename_datetime(filename: str) -> datetime:
+    """Convert a name like "2025-08-22T184429.png" to a datetime object."""
+    assert filename.count(".") == 1
+    raw_name = filename.split(".", 3)[0]  # remove extension
+    time = datetime.strptime(
+        raw_name,
         '%Y-%m-%dT%H%M%S'
     )
-    if datetime_formatted is None:
+    if time is None:
         raise ValueError(f"Could not parse datetime from filename: {filename}")
-    return int(datetime_formatted.timestamp())
+    return time
 
 
 def _unix_to_timestring(unix_time: int) -> str:
@@ -64,7 +72,7 @@ class Grapher:
         :param appended_data: The data point to append.
         """
         self.add_data_point(
-            parse_filename_datetime(filename),
+            parse_filename_unix_time(filename),
             appended_data
         )
 

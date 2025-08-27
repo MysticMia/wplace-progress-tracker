@@ -5,7 +5,7 @@ from PIL import Image
 from src.config import load_config, Config
 from src.utils.image_utils import get_pixel_count
 from src.utils.color_utils import ColorName
-from src.utils.graphing_utils import Grapher, parse_filename_datetime
+from src.utils.graphing_utils import Grapher, parse_filename_unix_time
 import os
 
 
@@ -36,7 +36,7 @@ def put_average_placement_data(
         path = os.path.join(config.picture_dir, image_name)
         img = Image.open(path)
         count = get_pixel_count(img)
-        image_time = parse_filename_datetime(image_name)
+        image_time = parse_filename_unix_time(image_name)
         if previous_image_count is None:
             previous_image_count = count
             previous_image_time = image_time
