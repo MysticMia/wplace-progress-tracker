@@ -49,7 +49,7 @@ def put_average_placement_data(
 
         timespan = (image_time - previous_image_time)
         count_difference: dict[ColorName, float] = {
-            k: (v - previous_image_count[k]) * TIME_INTERVAL / timespan
+            k: (v - previous_image_count[k]) * 60 / timespan
             for k, v in count.items()
         }
         grapher.add_data_point_from_filename(image_name, count_difference)

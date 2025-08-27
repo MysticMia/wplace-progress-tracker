@@ -133,10 +133,6 @@ class Grapher:
                 continue
             if len(self.data[key]) > 1:
                 only_one_data_point = False
-            # Don't plot graphs once they reached zero.
-            if self.data[key][0] == 0:
-                # This graph will be entirely zeros so might as well ignore it.
-                continue
             line_color = _pixel_color_to_graph_color(PIXEL_COLORS[key])
             if line_color == (1, 1, 1):
                 # Display white as a dotted black line (on a white background)
