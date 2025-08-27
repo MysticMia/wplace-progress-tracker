@@ -14,7 +14,7 @@ def _pixel_color_to_graph_color(
     return r / 255, g / 255, b / 255
 
 
-def _parse_filename_datetime(filename: str) -> int:
+def parse_filename_datetime(filename: str) -> int:
     datetime_str = filename.split(".", 3)[0]
     datetime_formatted = datetime.strptime(
         datetime_str,
@@ -40,7 +40,7 @@ class Grapher:
     def add_data_point(
             self,
             time: int,
-            appended_data: dict[ColorName, int],
+            appended_data: dict[ColorName, float],
     ) -> None:
         # Todo: this is a duplicate
         for key in self.data:
@@ -54,7 +54,7 @@ class Grapher:
     def add_data_point_from_filename(
             self,
             filename: str,
-            appended_data: dict[ColorName, int],
+            appended_data: dict[ColorName, float],
     ) -> None:
         """
         Helper to run `add_data_point` with a filename, instead of
@@ -64,7 +64,7 @@ class Grapher:
         :param appended_data: The data point to append.
         """
         self.add_data_point(
-            _parse_filename_datetime(filename),
+            parse_filename_datetime(filename),
             appended_data
         )
 
@@ -133,10 +133,6 @@ class Grapher:
                 continue
             if len(self.data[key]) > 1:
                 only_one_data_point = False
-            # Don't plot graphs once they reached zero.
-            if self.data[key][0] == 0:
-                # This graph will be entirely zeros so might as well ignore it.
-                continue
             line_color = _pixel_color_to_graph_color(PIXEL_COLORS[key])
             if line_color == (1, 1, 1):
                 # Display white as a dotted black line (on a white background)
