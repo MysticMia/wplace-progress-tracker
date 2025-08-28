@@ -16,9 +16,7 @@ def _save_pixel_count_data(config: Config, data: dict[ColorName, int]):
             f.write(f"{key:>{max_key_length}}: {value}\n")
 
 
-def save_pixel_count(config_name: str):
-    config = load_config(config_name)
-
+def save_pixel_count(config: Config):
     image_path = os.path.join(config.output_dir,
                               config.paths.REMAINING_PIXELS_NAME)
     img = Image.open(image_path)
@@ -39,4 +37,4 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    save_pixel_count(args.config)
+    save_pixel_count(load_config(args.config))

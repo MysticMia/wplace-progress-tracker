@@ -108,12 +108,20 @@ sorted by the amount of remaining pixels.
 python pixel_locator.py mia --pixel_color "Deep Red"
 ```
 Draws circles / hollow blobs around the "Deep Red" pixel color.
-These circles are drawn on a copy of the `remaining_pixels.png` picture.
+These circles are drawn on a copy of the `remaining_pixels.png` picture.  
+&nbsp;
 
 ```bash
 python pixel_locator.py mia --pixel_color "Deep Red" --pixel_color "Red"
 ```
-Draws circles around multiple colors.
+Draws circles around multiple colors.  
+&nbsp;
+
+```bash
+python pixel_locator.py mia -p "Deep Red" -p "Red"
+```
+Use `-p` as shorthand for `--pixel_color`.  
+&nbsp;
 
 ```bash
 python pixel_locator.py mia --pixel_color "Red" --circle_radius 6 --circle_width 2 --circle_color 255,255,0,255 --on-template
@@ -129,3 +137,4 @@ python progress_gif_maker.py mia --gif_length 3
 Make a 3-second long gif from the downloaded progress pictures. This works
 best if you have a lot of pictures spread out over time. 3 seconds may be too
 little depending on the size of the build. I recommend 2 seconds or something.
+Keep in mind a 3-second 6 FPS gif is 18 frames.

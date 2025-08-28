@@ -147,7 +147,7 @@ if __name__ == "__main__":
         help="The config to use."
     )
     arg_parser.add_argument(
-        "--pixel_color",
+        "--pixel_color", "-p",
         type=str,
         action="append",
         required=True,

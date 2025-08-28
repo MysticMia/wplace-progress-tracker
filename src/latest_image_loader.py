@@ -8,8 +8,8 @@ from PIL import Image
 from io import BytesIO
 
 from src.utils.coord_utils import WplaceCoordinate
-from .config import load_config
 
+from .config import load_config, Config
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%dT%H%M%S")
 FILE_NAME = f"{TIMESTAMP}.png"
@@ -170,8 +170,9 @@ def crop_image(
     ))
 
 
-def save_latest_image(config_name: str):
-    config = load_config(config_name)
+def save_latest_image(
+        config: Config,
+) -> str:
 
     coords = get_grid_coordinates(config.top_left, config.image_size)
 
@@ -198,5 +199,5 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    t = save_latest_image(args.config)
+    t = save_latest_image(load_config(args.config))
     print(f"Created progress picture at {t}.png")
