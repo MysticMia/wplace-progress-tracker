@@ -5,7 +5,6 @@ from src import (
     save_latest_image,
     save_remainder_images,
     save_pixel_count,
-    save_pixel_progress_graph,
 )
 from src.config import load_config
 
@@ -49,7 +48,7 @@ if __name__ == "__main__":
         help="The config to use."
     )
     arg_parser.add_argument(
-        "--ignore_if_identical",
+        "--ignore_if_identical", "-id",
         action="store_true",
         help="Discard the downloaded image if it is identical to the most "
              "recent already-saved image."

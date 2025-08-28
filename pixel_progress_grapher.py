@@ -84,10 +84,11 @@ def save_pixel_progress_graph(
     if as_percentage:
         convert_progress_data_to_percentage(config, grapher)
 
-    y_label = "Remaining pixels" + (" (%)" if as_percentage else "")
+    title = "Placed pixels" if as_progress else "Remaining pixels"
+    y_label = title + " (%)" if as_percentage else ""
     grapher.make_graph(
         config,
-        f"Remaining pixels on '{config.name}'",
+        f"{title} on '{config.name}'",
         y_label,
         max_minutes=max_minutes,
         as_step=as_step
@@ -104,27 +105,27 @@ if __name__ == "__main__":
         help="The config to use."
     )
     arg_parser.add_argument(
-        "--as_progress",
+        "--as_progress", "-a",
         action="store_true",
         help="Whether to track progress or track remaining pixels. "
              "(Default: Remaining pixels, add this flag to track "
              "progress instead.)"
     )
     arg_parser.add_argument(
-        "--max_minutes",
+        "--max_minutes", "-m",
         type=int,
         default=None,
         help="How far back in time to make the graph, in minutes. "
              "(Default: No limit)"
     )
     arg_parser.add_argument(
-        "--as_step",
+        "--as_step", "-s",
         action="store_true",
         help="Whether to make the graph as steps or as a line. "
              "(Default: Line graph)"
     )
     arg_parser.add_argument(
-        "--as_percentage",
+        "--as_percentage", "-p",
         action="store_true",
         help="Display each plot as a percentage of the placed pixels from the "
              "total pixels from the template image."

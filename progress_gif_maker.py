@@ -90,7 +90,7 @@ if __name__ == '__main__':
         help="The config to use."
     )
     arg_parser.add_argument(
-        "--gif_length",
+        "--gif_length", "-l",
         type=int,
         required=True,
         help="The length of the gif, in seconds."

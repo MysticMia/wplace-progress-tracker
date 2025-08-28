@@ -226,5 +226,8 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    t = save_latest_image(load_config(args.config))
+    t = save_latest_image(
+        load_config(args.config),
+        args.ignore_if_identical
+    )
     print(f"Created progress picture at {t}.png")
