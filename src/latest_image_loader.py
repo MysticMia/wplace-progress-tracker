@@ -8,7 +8,7 @@ from PIL import Image
 from io import BytesIO
 
 from src.utils.coord_utils import WplaceCoordinate
-
+from src.utils.image_utils import are_images_identical
 from .config import load_config, Config
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%dT%H%M%S")
@@ -170,18 +170,45 @@ def crop_image(
     ))
 
 
+def get_latest_progress_picture(config: Config):
+    pictures = os.listdir(config.picture_dir)
+    if len(pictures) == 0:
+        return None
+    image_name = sorted(pictures)[-1]  # latest timestamp
+    image_path = os.path.join(config.picture_dir, image_name)
+    return Image.open(image_path)
+
+
 def save_latest_image(
         config: Config,
-) -> str:
+        ignore_if_identical: bool,
+) -> str | None:
+    """
+    Fetch and save the most recent wplace canvas image.
 
+    :param config: The config for which to get the canvas.
+    :param ignore_if_identical: Don't create a file if the downloaded image is
+     identical to the most recent saved one.
+    :return: The timestamp of the saved image (the current time), or None if
+     **ignore-if_identical** is True and the canvas hasn't changed.
+    """
     coords = get_grid_coordinates(config.top_left, config.image_size)
 
+    # Get image
     pictures = asyncio.run(fetch_pictures(coords))
-
     chunk_picture = stitch_pictures(coords, pictures)
-
     image = crop_image(chunk_picture, config.top_left, config.bottom_right)
 
+    # Compare image
+    if ignore_if_identical:
+        latest_image = get_latest_progress_picture(config)
+        if (
+                latest_image is not None
+                and are_images_identical(image, latest_image)
+        ):
+            return None
+
+    # Save image
     path = os.path.join(config.picture_dir, FILE_NAME)
     image.save(path)
     return TIMESTAMP

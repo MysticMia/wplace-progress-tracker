@@ -220,3 +220,19 @@ def filter_colors(
                 filtered_image.putpixel((x, y), pixel)
 
     return filtered_image
+
+
+def are_images_identical(
+        img1: Image.Image,
+        img2: Image.Image,
+) -> bool:
+    if img1.size != img2.size:
+        return False
+
+    for x in range(img1.width):
+        for y in range(img1.height):
+            pixel1 = img1.getpixel((x, y))
+            pixel2 = img2.getpixel((x, y))
+            if pixel1 != pixel2:
+                return False
+    return True
