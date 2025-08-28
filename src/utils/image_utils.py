@@ -46,6 +46,15 @@ class Mask(Image.Image):
 
     @staticmethod
     def from_image_difference(img1: Image.Image, img2: Image.Image) -> "Mask":
+        """
+        Create a mask from the difference between two images. White pixels
+        are different, black pixels are the same.
+
+        :param img1: First image to compare.
+        :param img2: Second image to compare.
+        :return: A new mask from the difference of two image, masking them
+         as white.
+        """
         if img1.size != img2.size:
             raise ValueError("Images must be the same size")
         assert img1.mode == 'RGBA', "Image 1 must be RGBA!"
@@ -59,7 +68,7 @@ class Mask(Image.Image):
                 pixel1: ColorTuple = img1.getpixel((x, y))  # type: ignore
                 pixel2: ColorTuple = img2.getpixel((x, y))  # type: ignore
                 if pixel1[3] == 0 or pixel2[3] == 0:
-                    # Ignore transparent pixels.
+                    # Ignore transparent pixels: leave black.
                     continue
                 if pixel1 != pixel2:
                     mask.putpixel((x, y), 1)  # White (1)
@@ -121,7 +130,7 @@ class Mask(Image.Image):
 
     def iterate_predicate(
             self,
-            predicate: typing.Callable[[float], bool]
+            predicate: typing.Callable[[int], bool]
     ) -> typing.Generator[tuple[int, int], None, None]:
         """
         Create an iterator for the coordinates if the pixel at the coordinate
@@ -131,9 +140,19 @@ class Mask(Image.Image):
         """
         for x in range(self.width):
             for y in range(self.height):
-                pixel: float = self.im.getpixel((x, y))
+                pixel: int = self.im.getpixel((x, y))
                 if predicate(pixel):
                     yield x, y
+
+    def count(self) -> dict[int, int]:
+        count_data = {}
+        for x in range(self.width):
+            for y in range(self.height):
+                pixel: int = self.im.getpixel((x, y))
+                if pixel not in count_data:
+                    count_data[pixel] = 0
+                count_data[pixel] += 1
+        return count_data
 
 
 def get_remaining_pixels_image(
@@ -156,12 +175,12 @@ def get_remaining_pixels_image(
         )
     remaining_pixels = Image.new('RGBA', template.size, (0, 0, 0, 0))
 
-    # Add all pixels that are transparent.
+    # Mask placed pixels to the template.
     placed_pixel_mask: Mask = Mask.from_pixel_opacity(progress)
     unplaced_pixel_mask: Mask = placed_pixel_mask.get_inverted()
     remaining_pixels.paste(template, mask=unplaced_pixel_mask)
 
-    # Add incorrect pixels, since those still need to be correctly placed.
+    # Replace incorrect pixels with the template.
     incorrect_pixels = Mask.from_image_difference(template, progress)
     remaining_pixels.paste(template, mask=incorrect_pixels)
 

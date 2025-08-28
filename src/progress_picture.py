@@ -2,12 +2,30 @@ import argparse
 import os.path
 from PIL import Image
 
-from src.utils.image_utils import get_remaining_pixels_image, filter_colors
+from src.utils.image_utils import (
+    get_remaining_pixels_image,
+    filter_colors,
+    Mask,
+)
 from .config import load_config, Config
 
 REMAINING_PIXELS_NAME = "remaining_pixels.png"
 REMAINING_PLACEABLE_PIXELS_NAME = "remaining_pixels_placeable.png"
 REMAINING_UNPLACEABLE_PIXELS_NAME = "remaining_pixels_unplaceable.png"
+
+
+def get_progress(config: Config, remainder_image: Image.Image) -> float:
+    template = config.get_template_image()
+    template_mask = Mask.from_pixel_opacity(template)
+    # ^ White for placed pixels, black for unplaced / transparent pixels.
+    remaining_mask = Mask.from_pixel_opacity(remainder_image)
+    # ^ White for unplaced pixels, black for placed / transparent pixels.
+
+    template_count = template_mask.count().get(255, 0)  # get total pixels
+    remaining_count = remaining_mask.count().get(255, 0)  # get unplaced pixels
+
+    remaining_progress = remaining_count / template_count
+    return 1 - remaining_progress
 
 
 def load_picture(config: Config, progress_picture_name: str):
@@ -41,6 +59,10 @@ def save_remainder_images(config: Config, progress_picture_name: str):
                                 list(config.unavailable_colors.keys()))
     path = os.path.join(config.output_dir,
                         config.paths.REMAINING_UNPLACEABLE_PIXELS_NAME)
+
+    progress = get_progress(config, remainder_img)
+    print(f"The template has been built for {progress:.2%}.")
+
     unavailable.save(path)
 
 
