@@ -9,14 +9,17 @@ from src import (
 
 
 def main(
-        config_name: str,
+        config_names: list[str],
 ):
-    print("Fetching progress image...")
-    timestamp: str = save_latest_image(config_name)
-    print("Creating remainder image...")
-    save_progress_image(config_name, f"{timestamp}.png")
-    print("Counting pixels...")
-    save_pixel_count(config_name)
+    for config_name in config_names:
+        print(f"Fetching latest image for {config_name}...")
+        timestamp: str = save_latest_image(config_name)
+        print("Creating remainder image...")
+        save_progress_image(config_name, f"{timestamp}.png")
+        print("Counting pixels...")
+        save_pixel_count(config_name)
+        print()
+    print("Successfully fetched latest image(s)!")
 
 
 if __name__ == "__main__":
@@ -26,6 +29,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "config",
         type=str,
+        nargs="+",
         help="The config to use."
     )
     args = arg_parser.parse_args()
