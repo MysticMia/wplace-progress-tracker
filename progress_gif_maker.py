@@ -65,7 +65,6 @@ def make_progress_gif(
         frame_duration = distance * frame_multiplier * 1000  # in msec
         if frame_duration < 1:
             frame_duration = 1
-        print(f"{int(frame_duration):>5}")
         frame_durations.append(int(frame_duration))
 
     output_path = os.path.join(config.output_dir,

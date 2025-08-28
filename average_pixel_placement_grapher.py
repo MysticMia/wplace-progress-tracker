@@ -88,12 +88,14 @@ if __name__ == "__main__":
         "--max_minutes",
         type=int,
         default=None,
-        help="How far back in time to make the graph, in minutes."
+        help="How far back in time to make the graph, in minutes. "
+             "(default: No limit)"
     )
     arg_parser.add_argument(
         "--step_graph",
         action="store_true",
-        help="Whether to make the graph as steps or as a line."
+        help="Whether to make the graph as steps or as a line. "
+             "(Default: Line graph)"
     )
 
     args = arg_parser.parse_args()

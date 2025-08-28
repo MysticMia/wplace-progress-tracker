@@ -157,20 +157,23 @@ if __name__ == "__main__":
         "--circle_radius",
         type=int,
         default=6,
-        help="The radius of the circle to draw around each pixel."
+        help="The radius of the circle to draw around each pixel. "
+             "(Default: 6)"
     )
     arg_parser.add_argument(
         "--circle_width",
         type=int,
         default=2,
-        help="The width of the circle to draw around each pixel."
+        help="The width of the circle to draw around each pixel. "
+             "(Default: 2)"
     )
     arg_parser.add_argument(
         "--circle_color",
         type=str,
         default="255,0,0,255",
-        help="The color of the circle to draw around each pixel. "
-             "Should be an \"r,g,b,a\" string."
+        help="The RGB color of the circle to draw around each pixel. "
+             "Should be an \"r,g,b,a\" string. "
+             "(Default: 255,0,0,255)"
     )
     arg_parser.add_argument(
         "--on_template",
@@ -182,8 +185,9 @@ if __name__ == "__main__":
         "--background_color",
         type=str,
         default="0,0,0,0",
-        help="The color of the background, like water or grass. "
-             "Use '158,189,255,255' for water."
+        help="The RGB color of the background, like water or grass. "
+             "Use '158,189,255,255' for water. "
+             "(Default: 0,0,0,0)"
     )
 
     args = arg_parser.parse_args()
