@@ -92,6 +92,7 @@ if __name__ == '__main__':
     arg_parser.add_argument(
         "--gif_length",
         type=int,
+        required=True,
         help="The length of the gif, in seconds."
     )
 

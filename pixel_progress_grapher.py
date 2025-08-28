@@ -1,10 +1,11 @@
 import argparse
+import types
 from io import TextIOWrapper
 
 from src.utils.graphing_utils import Grapher
 from src.utils.image_utils import get_pixel_count
 from src.config import load_config, Config
-from src.utils.color_utils import ColorName
+from src.utils.color_utils import ColorName, PIXEL_COLORS
 from typing import Literal, cast
 from PIL import Image
 import os
@@ -25,19 +26,29 @@ def parse_file(text: TextIOWrapper) -> dict[ColorName, int]:
 def put_progress_data(
         config: Config,
         grapher: Grapher,
+        as_progress: bool,
 ) -> None:
+    template = config.get_template_image()
+    template_count = get_pixel_count(template)
+
     for file in os.listdir(config.picture_dir):
         filename = os.fsdecode(file)
         image_path = os.path.join(config.picture_dir, filename)
         img = Image.open(image_path)
 
         color_data = get_pixel_count(img)
+        if not as_progress:
+            color_data: dict[ColorName, int] = {
+                k: template_count[k] - v
+                for k, v in color_data.items()
+            }
+
         grapher.add_data_point_from_filename(filename, color_data)
 
 
 def convert_progress_data_to_percentage(
         config: Config,
-        grapher: Grapher
+        grapher: Grapher,
 ) -> None:
     template_image = config.get_template_image()
     pixel_counts: dict[ColorName, int] = get_pixel_count(template_image)
@@ -63,14 +74,16 @@ def save_pixel_progress_graph(
         config_name: str,
         max_minutes: int | None = None,
         as_step: bool = False,
+        as_progress: bool = False,
         as_percentage: bool = False,
 ):
     config = load_config(config_name)
     grapher = Grapher()
-    put_progress_data(config, grapher)
+    put_progress_data(config, grapher, as_progress)
 
     if as_percentage:
         convert_progress_data_to_percentage(config, grapher)
+
     y_label = "Remaining pixels" + (" (%)" if as_percentage else "")
     grapher.make_graph(
         config,
@@ -91,6 +104,13 @@ if __name__ == "__main__":
         help="The config to use."
     )
     arg_parser.add_argument(
+        "--as_progress",
+        action="store_true",
+        help="Whether to track progress or track remaining pixels. "
+             "(Default: Remaining pixels, add this flag to track "
+             "progress instead.)"
+    )
+    arg_parser.add_argument(
         "--max_minutes",
         type=int,
         default=None,
@@ -103,10 +123,18 @@ if __name__ == "__main__":
         help="Whether to make the graph as steps or as a line. "
              "(Default: Line graph)"
     )
+    arg_parser.add_argument(
+        "--as_percentage",
+        action="store_true",
+        help="Display each plot as a percentage of the placed pixels from the "
+             "total pixels from the template image."
+    )
     args = arg_parser.parse_args()
 
     save_pixel_progress_graph(
         args.config,
         args.max_minutes,
         args.as_step,
+        args.as_progress,
+        args.as_percentage,
     )

@@ -122,7 +122,7 @@ Draw yellow (RGBA 255,255,0,255 = red + green = yellow) circles with a radius
 of 6 and a width of 2. This picture is drawn on a copy of the `template.png`
 image, instead of the `remaining_pixels.png` image. 
 
-## progress_gif_maker.py
+### progress_gif_maker.py
 ```bash
 python progress_gif_maker.py mia --gif_length 3
 ```

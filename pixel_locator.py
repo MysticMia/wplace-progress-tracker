@@ -150,6 +150,7 @@ if __name__ == "__main__":
         "--pixel_color",
         type=str,
         action="append",
+        required=True,
         help="The color to locate. Use quotation marks for colors that "
              "use multiple words: \"Dark Red\"."
     )
