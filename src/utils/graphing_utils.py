@@ -106,14 +106,17 @@ class Grapher:
         for key in self.data:
             if key == 'time':
                 continue
+            data_max_index = len(self.data[key]) - 1
             self.data[key] = [
                 float('nan')
-                if i > 0 and self.data[key][i - 1] == 0
-                # ^ if the previous point is 0, the one point should also be 0
-                #  too: We won't need to plot the 'zero' points
-                #  after the first one.
+                if (
+                        (i > 0 and self.data[key][i - 1] == 0)
+                        and (i < data_max_index and self.data[key][i + 1] == 0)
+                )
+                # ^ if the previous and next point is 0, the one in the middle
+                #  doesn't need to be rendered.
                 else self.data[key][i]
-                for i in range(len(self.data[key]))  # from index 1: i-1>=0
+                for i in range(len(self.data[key]))
             ]
 
     def make_graph(
