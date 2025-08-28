@@ -8,7 +8,7 @@ from src.utils.color_utils import ColorName, PIXEL_COLORS, ColorTuple
 import os
 
 
-def _validate_color(color) -> ColorName:
+def _validate_color(color: str) -> ColorName:
     if color not in PIXEL_COLORS.keys():
         for valid_color in PIXEL_COLORS.keys():
             if valid_color.lower().startswith(color.lower()):
@@ -118,7 +118,7 @@ def save_pixel_locator_image(
         on_template: bool = False,
 ):
     config = load_config(config_name)
-    colors = [_validate_color(c) for c in color_strs]
+    colors: list[ColorName] = [_validate_color(c) for c in color_strs]
     circle_color = parse_rgba_color(circle_color_str)
     background_color = None
     if background_color_str is not None:

@@ -20,6 +20,11 @@ pixels, you get an out-of-place spike. This may be fixed later.
 Download python 3 or higher [here]. Download or clone this repository,
 open a command prompt, and navigate to the root folder.
 
+Then install the necessary packages:
+```bash
+pip install -r requirements.txt
+```
+
 [here]: https://wiki.python.org/moin/BeginnersGuide/Download
 
 ## Setup

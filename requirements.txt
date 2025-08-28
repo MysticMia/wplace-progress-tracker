@@ -1,6 +1,5 @@
-typing-extensions
-pillow
+pillow >= 11.3.0
 aiohttp
-bs4
-matplotlib
-numpy
+bs4 >= 0.0.2
+matplotlib >= 3.10.5
+numpy >= 2.3.2
