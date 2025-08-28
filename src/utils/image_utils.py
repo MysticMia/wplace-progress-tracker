@@ -136,7 +136,7 @@ class Mask(Image.Image):
                     yield x, y
 
 
-def get_remaining_pixels(
+def get_remaining_pixels_image(
         template: Image.Image,
         progress: Image.Image,
 ) -> Image.Image:

@@ -37,7 +37,6 @@ class ImageSize(TypedDict):
 
 class Subdirectories(TypedDict):
     picture: str
-    progress: str
     output: str
 
 
@@ -69,6 +68,8 @@ class FileNames:
     REMAINING_PLACEABLE_PIXELS_NAME = "remaining_pixels_placeable.png"
     REMAINING_UNPLACEABLE_PIXELS_NAME = "remaining_pixels_unplaceable.png"
     CIRCLE_OVERLAY_NAME = "pixel_finder.png"
+    REMAINING_PIXEL_COUNT_NAME = "remaining_pixels.txt"
+    PROGRESS_GIF_NAME = "progress.gif"
 
 
 class Config:
@@ -106,7 +107,6 @@ class Config:
 
     def create_directories(self) -> None:
         os.makedirs(self.picture_dir, exist_ok=True)
-        os.makedirs(self.progress_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
 
     def get_template_image(self):
@@ -130,13 +130,6 @@ class Config:
         return os.path.join(
             self.data_directory,
             self.subdirectories["picture"]
-        )
-
-    @property
-    def progress_dir(self):
-        return os.path.join(
-            self.data_directory,
-            self.subdirectories["progress"]
         )
 
     @property

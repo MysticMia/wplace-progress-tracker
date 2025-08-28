@@ -7,24 +7,24 @@ from PIL import Image
 from src.utils.color_utils import ColorName
 
 
-def _save_pixel_count_data(config: Config, name: str, data: dict[ColorName, int]):
-    path = os.path.join(config.progress_dir, name)
+def _save_pixel_count_data(config: Config, data: dict[ColorName, int]):
+    path = os.path.join(config.output_dir,
+                        config.paths.REMAINING_PIXEL_COUNT_NAME)
     with open(path, "w") as f:
+        max_key_length = max(len(key) for key in data.keys())
         for key, value in data.items():
-            f.write(f"{key}, {value}\n")
+            f.write(f"{key:>{max_key_length}}: {value}\n")
 
 
-def save_pixel_count(config_name: str, file_name: str):
+def save_pixel_count(config_name: str):
     config = load_config(config_name)
 
-    image_path = os.path.join(
-        config.output_dir,
-        f"remaining_pixels.png"
-    )
+    image_path = os.path.join(config.output_dir,
+                              config.paths.REMAINING_PIXELS_NAME)
     img = Image.open(image_path)
-    pixel_count = get_pixel_count(img)
 
-    _save_pixel_count_data(config, f"{file_name}.txt", pixel_count)
+    pixel_count = get_pixel_count(img)
+    _save_pixel_count_data(config, pixel_count)
 
 
 if __name__ == "__main__":
@@ -36,12 +36,7 @@ if __name__ == "__main__":
         type=str,
         help="The config file to use."
     )
-    arg_parser.add_argument(
-        "file_timestamp",
-        type=str,
-        help="The file to count (datetime)."
-    )
 
     args = arg_parser.parse_args()
 
-    save_pixel_count(args.config, args.file_timestamp)
+    save_pixel_count(args.config)

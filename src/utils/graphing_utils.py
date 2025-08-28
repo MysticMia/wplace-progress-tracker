@@ -1,5 +1,5 @@
 import os.path
-from typing import Literal, get_args
+from typing import Literal, get_args, overload
 
 from src.utils.color_utils import ColorName, ColorTuple, PIXEL_COLORS
 from datetime import datetime
@@ -62,7 +62,7 @@ class Grapher:
     def add_data_point_from_filename(
             self,
             filename: str,
-            appended_data: dict[ColorName, float],
+            appended_data: dict[ColorName, float] | dict[ColorName, int],
     ) -> None:
         """
         Helper to run `add_data_point` with a filename, instead of
@@ -71,6 +71,7 @@ class Grapher:
         :param filename: The name to parse to unix timestamp.
         :param appended_data: The data point to append.
         """
+        appended_data = {k: float(v) for k, v in appended_data.items()}
         self.add_data_point(
             parse_filename_unix_time(filename),
             appended_data
