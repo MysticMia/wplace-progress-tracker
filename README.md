@@ -1,4 +1,14 @@
-Utilities for wplace.
+Utilities for wplace. Scroll to bottom for examples and images.
+
+## Table of Contents
+- [Features](#Features)
+- [Installation](#Installation)
+- [Setup](#Setup)
+- [Configuration](#Configuration)
+- [Examples](#Examples)
+  - [fetch_latest_picture.py](#fetch_latest_picture.py)
+  - [pixel_locator.py](#pixel_locator.py)
+  - [progress_gif_maker.py](#progress_gif_maker.py)
 
 ## Features
 - Download a given area / canvas
@@ -89,10 +99,16 @@ These examples presume there exists a config file `~/config/mia.json` where the
 
 You typically run `fetch_latest_picture.py` before running other programs.
 
+The following `template.png` file has been placed in the `data_directory` folder:  
+<img alt="template.png" src="assets/template.png" width="250"/>
+
 ### fetch_latest_picture.py
 ```bash
 python fetch_latest_picture.py mia
 ```
+
+<img alt="2025-08-28T183215.png" src="assets/2025-08-28T183215.png" width="250"/>
+
 Uses the `~/config/mia.json` config file to locate my picture on the wplace
 canvas, and downloads the current state of the selected region. In this
 example, this image was taken on the 28th of August 2025 at 4:25, and will be
@@ -108,10 +124,28 @@ Finally, the pixels in the created `remaining_pixels.png` file are counted and
 saved to `~/mia art 1/outputs/remaining_pixels.txt`, grouped by color and
 sorted by the amount of remaining pixels.
 
+Placeable pixels = Free pixels and the colors mentioned in the `bought_colors`
+list in the config file.  
+<img alt="remaining_pixels_placeable.png" src="assets/remaining_pixels_placeable.png" width="250"/>
+
+Unplaceable pixels = Premium pixels that haven't been bought yet.  
+<img alt="remaining_pixels_unplaceable.png" src="assets/remaining_pixels_unplaceable.png" width="250"/>
+
+```bash
+python fetch_latest_picture.py mia lucy luna --ignore_identical
+```
+Runs the same fetch command for multiple config files. It will download the
+latest picture and compare it to the latest saves picture. If they are
+identical, it will discard the downloaded picture, and if they are different,
+it will save it instead.
+
 ### pixel_locator.py
 ```bash
 python pixel_locator.py mia --pixel_color "Deep Red"
 ```
+
+<img alt="pixel_finder.png" src="assets/pixel_finder.png"/>
+
 Draws circles / hollow blobs around the "Deep Red" pixel color.
 These circles are drawn on a copy of the `remaining_pixels.png` picture.  
 &nbsp;
@@ -139,6 +173,9 @@ image, instead of the `remaining_pixels.png` image.
 ```bash
 python progress_gif_maker.py mia --gif_length 3
 ```
+
+<img alt="progress.gif" src="assets/progress.gif" width="250"/>
+
 Make a 3-second long gif from the downloaded progress pictures. This works
 best if you have a lot of pictures spread out over time. 3 seconds may be too
 little depending on the size of the build. I recommend 2 seconds or something.
