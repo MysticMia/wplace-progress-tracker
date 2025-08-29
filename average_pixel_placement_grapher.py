@@ -66,6 +66,7 @@ def save_average_placement_graph(
     put_average_placement_data(config, grapher)
     grapher.make_graph(
         config,
+        config.paths.AVERAGE_PIXEL_PLACEMENT_GRAPH_NAME,
         title=f"Pixels placed on '{config.name}'",
         y_axis_label="Pixels per minute",
         max_minutes=max_minutes,

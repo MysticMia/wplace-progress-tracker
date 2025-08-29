@@ -43,6 +43,7 @@ def save_misplacement_data(
     put_misplacement_data(config, grapher)
     grapher.make_graph(
         config,
+        config.paths.MISPLACEMENT_GRAPH_NAME,
         f"Misplaced pixels on '{config.name}'",
         "Misplaced pixels",
         max_minutes=max_minutes,

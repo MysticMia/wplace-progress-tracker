@@ -70,6 +70,9 @@ class FileNames:
     CIRCLE_OVERLAY_NAME = "pixel_finder.png"
     REMAINING_PIXEL_COUNT_NAME = "remaining_pixels.txt"
     PROGRESS_GIF_NAME = "progress.gif"
+    AVERAGE_PIXEL_PLACEMENT_GRAPH_NAME = "average_placement_graph.png"
+    PIXEL_PROGRESS_GRAPH_NAME = "progress_graph.png"
+    MISPLACEMENT_GRAPH_NAME = "misplacement_graph.png"
 
 
 class Config:

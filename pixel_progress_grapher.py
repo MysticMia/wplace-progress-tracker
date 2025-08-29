@@ -88,6 +88,7 @@ def save_pixel_progress_graph(
     y_label = title + " (%)" if as_percentage else ""
     grapher.make_graph(
         config,
+        config.paths.PIXEL_PROGRESS_GRAPH_NAME,
         f"{title} on '{config.name}'",
         y_label,
         max_minutes=max_minutes,

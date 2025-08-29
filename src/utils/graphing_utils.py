@@ -122,6 +122,7 @@ class Grapher:
     def make_graph(
             self,
             config: Config,
+            file_name: str,
             title: str,
             y_axis_label: str,
             *,
@@ -208,5 +209,5 @@ class Grapher:
         ax.tick_params(axis='x', labelrotation=20)
         # ax.legend()
         fig.subplots_adjust(bottom=0.2)
-        path = os.path.join(config.output_dir, "graph.png")
+        path = os.path.join(config.output_dir, file_name)
         plt.savefig(path)
