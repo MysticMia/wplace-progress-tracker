@@ -14,8 +14,10 @@ REMAINING_PLACEABLE_PIXELS_NAME = "remaining_pixels_placeable.png"
 REMAINING_UNPLACEABLE_PIXELS_NAME = "remaining_pixels_unplaceable.png"
 
 
-def get_progress(config: Config, remainder_image: Image.Image) -> float:
-    template = config.get_template_image()
+def get_progress(
+        template: Image.Image,
+        remainder_image: Image.Image
+) -> float:
     template_mask = Mask.from_pixel_opacity(template)
     # ^ White for placed pixels, black for unplaced / transparent pixels.
     remaining_mask = Mask.from_pixel_opacity(remainder_image)
@@ -60,7 +62,7 @@ def save_remainder_images(config: Config, progress_picture_name: str):
     path = os.path.join(config.output_dir,
                         config.paths.REMAINING_UNPLACEABLE_PIXELS_NAME)
 
-    progress = get_progress(config, remainder_img)
+    progress = get_progress(template, remainder_img)
     print(f"The template has been built for {progress:.2%}.")
 
     unavailable.save(path)
