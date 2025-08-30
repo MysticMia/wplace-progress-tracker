@@ -203,6 +203,8 @@ def get_pixel_count(img: Image.Image) -> dict[ColorName, int]:
     for x in range(img.width):
         for y in range(img.height):
             pixel: ColorTuple = img.getpixel((x, y))  # type: ignore
+            if pixel[3] == 0:  # why does (255, 255, 255, 0) exist -_-
+                pixel = (0, 0, 0, 0)
             pixel_name = name_table[pixel]
             pixel_count[pixel_name] += 1
 
