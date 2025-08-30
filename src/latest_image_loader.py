@@ -3,13 +3,13 @@ import asyncio
 import aiohttp
 import os
 from datetime import datetime
+from io import BytesIO
 from math import ceil
 from PIL import Image
-from io import BytesIO
 
+from src.config import load_config, Config
 from src.utils.coord_utils import WplaceCoordinate
 from src.utils.image_utils import are_images_identical
-from .config import load_config, Config
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%dT%H%M%S")
 FILE_NAME = f"{TIMESTAMP}.png"

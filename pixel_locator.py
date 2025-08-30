@@ -9,6 +9,7 @@ import os
 
 
 def _validate_color(color: str) -> ColorName:
+    color = color.replace("_", " ")  # because quality of life
     if color not in PIXEL_COLORS.keys():
         for valid_color in PIXEL_COLORS.keys():
             if valid_color.lower().startswith(color.lower()):

@@ -1,10 +1,10 @@
 import argparse
 import os.path
-
-from src.utils.image_utils import get_pixel_count
-from .config import load_config, Config
 from PIL import Image
+
+from src.config import load_config, Config
 from src.utils.color_utils import ColorName
+from src.utils.image_utils import get_pixel_count
 
 
 def _save_pixel_count_data(config: Config, data: dict[ColorName, int]):

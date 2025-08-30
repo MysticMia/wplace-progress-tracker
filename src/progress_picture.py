@@ -2,12 +2,12 @@ import argparse
 import os.path
 from PIL import Image
 
+from src.config import load_config, Config
 from src.utils.image_utils import (
     get_remaining_pixels_image,
     filter_colors,
     Mask,
 )
-from .config import load_config, Config
 
 REMAINING_PIXELS_NAME = "remaining_pixels.png"
 REMAINING_PLACEABLE_PIXELS_NAME = "remaining_pixels_placeable.png"

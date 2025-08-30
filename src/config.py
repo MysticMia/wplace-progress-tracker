@@ -3,8 +3,17 @@ import os.path
 import typing
 from PIL import Image
 
-from src.utils.color_utils import ColorName, PIXEL_COLORS, FREE_PIXEL_COLORS, ColorTuple, PREMIUM_PIXEL_COLORS
-from src.utils.coord_utils import WplaceCoordinate, get_bottom_right_corner
+from src.utils.color_utils import (
+    ColorName,
+    PIXEL_COLORS,
+    FREE_PIXEL_COLORS,
+    ColorTuple,
+    PREMIUM_PIXEL_COLORS,
+)
+from src.utils.coord_utils import (
+    WplaceCoordinate,
+    get_bottom_right_corner,
+)
 from typing import TypedDict
 
 __all__ = [
