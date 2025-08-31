@@ -117,6 +117,7 @@ def save_pixel_locator_image(
         circle_color_str: str = "255,0,0,255",
         background_color_str: str | None = None,
         on_template: bool = False,
+        show_immedately: bool = False,
 ):
     config = load_config(config_name)
     colors: list[ColorName] = [_validate_color(c) for c in color_strs]
@@ -136,6 +137,8 @@ def save_pixel_locator_image(
     output_path = os.path.join(config.output_dir,
                                config.paths.CIRCLE_OVERLAY_NAME)
     circle_overlay.save(output_path)
+    if show_immedately:
+        circle_overlay.show()
 
 
 if __name__ == "__main__":
@@ -156,21 +159,21 @@ if __name__ == "__main__":
              "use multiple words: \"Dark Red\"."
     )
     arg_parser.add_argument(
-        "--circle_radius",
+        "--circle_radius", "-r",
         type=int,
         default=6,
         help="The radius of the circle to draw around each pixel. "
              "(Default: 6)"
     )
     arg_parser.add_argument(
-        "--circle_width",
+        "--circle_width", "-l",
         type=int,
         default=2,
         help="The width of the circle to draw around each pixel. "
              "(Default: 2)"
     )
     arg_parser.add_argument(
-        "--circle_color",
+        "--circle_color", "-c",
         type=str,
         default="255,0,0,255",
         help="The RGB color of the circle to draw around each pixel. "
@@ -178,18 +181,23 @@ if __name__ == "__main__":
              "(Default: 255,0,0,255)"
     )
     arg_parser.add_argument(
-        "--on_template",
+        "--on_template", "-t",
         action="store_true",
         help="If true, circles are rendered over the template. Otherwise, "
              "circles are rendered over the remaining pixels."
     )
     arg_parser.add_argument(
-        "--background_color",
+        "--background_color", "-b",
         type=str,
         default="0,0,0,0",
         help="The RGB color of the background, like water or grass. "
              "Use '158,189,255,255' for water. "
              "(Default: 0,0,0,0)"
+    )
+    arg_parser.add_argument(
+        "--show-immedately", "-s",
+        action="store_true",
+        help="Whether to show the image immediately after it is created."
     )
 
     args = arg_parser.parse_args()
@@ -202,4 +210,5 @@ if __name__ == "__main__":
         args.circle_color,
         args.background_color,
         args.on_template,
+        args.show_immedately,
     )

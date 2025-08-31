@@ -157,9 +157,10 @@ Draws circles around multiple colors.
 &nbsp;
 
 ```bash
-python pixel_locator.py mia -p "Deep Red" -p "Red"
+python pixel_locator.py mia -s -p "Deep Red" -p "Red"
 ```
-Use `-p` as shorthand for `--pixel_color`.  
+Use `-p` as shorthand for `--pixel_color`. The `-s` flag is shorthand for
+`--show_immediately`. 
 &nbsp;
 
 ```bash
