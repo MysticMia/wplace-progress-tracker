@@ -197,7 +197,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--show-immedately", "-s",
         action="store_true",
-        help="Whether to show the image immediately after it is created."
+        help="Whether to show/open the image immediately after it is created."
     )
 
     args = arg_parser.parse_args()
